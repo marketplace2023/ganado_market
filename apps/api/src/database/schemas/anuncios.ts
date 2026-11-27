@@ -9,6 +9,7 @@ import type {
 } from "@workspace/shared"
 import { sql } from "drizzle-orm"
 import {
+  foreignKey,
   boolean,
   index,
   integer,
@@ -27,19 +28,13 @@ import { fincasTable } from "./fincas.ts"
 import { usersTable } from "./users.ts"
 
 export const anunciosTable = pgTable(
-  "anuncios",
+  "livestock_listing",
   {
     id: serial("id").primaryKey(),
-    ownerId: integer("owner_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    fincaId: integer("finca_id")
-      .notNull()
-      .references(() => fincasTable.id, { onDelete: "cascade" }),
-    especieId: integer("especie_id")
-      .notNull()
-      .references(() => especiesTable.id),
-    razaId: integer("raza_id").references(() => razasTable.id, { onDelete: "set null" }),
+    ownerId: integer("owner_id").notNull(),
+    fincaId: integer("finca_id").notNull(),
+    especieId: integer("especie_id").notNull(),
+    razaId: integer("raza_id"),
     title: varchar("title", { length: 120 }).notNull(),
     slug: varchar("slug", { length: 140 }).notNull().unique("uk_anuncios_slug"),
     description: text("description").notNull().default(""),
@@ -73,6 +68,26 @@ export const anunciosTable = pgTable(
       .$onUpdate(() => new Date()),
   },
   (t) => [
+    foreignKey({
+      name: "anuncios_owner_id_users_id_fk",
+      columns: [t.ownerId],
+      foreignColumns: [usersTable.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "anuncios_finca_id_fincas_id_fk",
+      columns: [t.fincaId],
+      foreignColumns: [fincasTable.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "anuncios_especie_id_especies_id_fk",
+      columns: [t.especieId],
+      foreignColumns: [especiesTable.id],
+    }),
+    foreignKey({
+      name: "anuncios_raza_id_razas_id_fk",
+      columns: [t.razaId],
+      foreignColumns: [razasTable.id],
+    }).onDelete("set null"),
     index("ix_anuncios_status").on(t.status),
     index("ix_anuncios_estado").on(t.estado),
     index("ix_anuncios_especie").on(t.especieId),
@@ -82,12 +97,10 @@ export const anunciosTable = pgTable(
 )
 
 export const reservasAnuncioTable = pgTable(
-  "reservas_anuncio",
+  "livestock_listing_reservation",
   {
     id: serial("id").primaryKey(),
-    anuncioId: integer("anuncio_id")
-      .notNull()
-      .references(() => anunciosTable.id, { onDelete: "cascade" }),
+    anuncioId: integer("anuncio_id").notNull(),
     solicitudId: uuid("solicitud_id").notNull(),
     cantidad: integer("cantidad").notNull(),
     precioUsd: numeric("precio_usd", { precision: 14, scale: 2, mode: "number" }).notNull(),
@@ -98,33 +111,41 @@ export const reservasAnuncioTable = pgTable(
     resultado: varchar("resultado", { length: 20 }).$type<NonNullable<ReservaAnuncio["resultado"]>>(),
   },
   (t) => [
+    foreignKey({
+      name: "reservas_anuncio_anuncio_id_anuncios_id_fk",
+      columns: [t.anuncioId],
+      foreignColumns: [anunciosTable.id],
+    }).onDelete("cascade"),
     uniqueIndex("uk_reservas_anuncio_solicitud").on(t.anuncioId, t.solicitudId),
     uniqueIndex("uk_reservas_anuncio_abierta").on(t.anuncioId).where(sql`${t.endedAt} is null`),
   ]
 )
 
 export const anuncioMediaTable = pgTable(
-  "anuncio_media",
+  "product_image",
   {
     id: serial("id").primaryKey(),
-    anuncioId: integer("anuncio_id")
-      .notNull()
-      .references(() => anunciosTable.id, { onDelete: "cascade" }),
+    anuncioId: integer("anuncio_id").notNull(),
     url: varchar("url", { length: 500 }).notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
   },
-  (t) => [index("ix_anuncio_media_anuncio").on(t.anuncioId)]
+  (t) => [
+    foreignKey({
+      name: "anuncio_media_anuncio_id_anuncios_id_fk",
+      columns: [t.anuncioId],
+      foreignColumns: [anunciosTable.id],
+    }).onDelete("cascade"),
+    index("ix_anuncio_media_anuncio").on(t.anuncioId),
+  ]
 )
 
 /** Consultas (leads) que un comprador envía al ganadero desde un anuncio. */
 export const consultasTable = pgTable(
-  "consultas",
+  "crm_lead",
   {
     id: serial("id").primaryKey(),
-    anuncioId: integer("anuncio_id")
-      .notNull()
-      .references(() => anunciosTable.id, { onDelete: "cascade" }),
-    userId: integer("user_id").references(() => usersTable.id, { onDelete: "set null" }),
+    anuncioId: integer("anuncio_id").notNull(),
+    userId: integer("user_id"),
     name: varchar("name", { length: 100 }).notNull(),
     phone: varchar("phone", { length: 20 }).notNull(),
     email: varchar("email", { length: 255 }),
@@ -132,19 +153,39 @@ export const consultasTable = pgTable(
     status: varchar("status", { length: 20 }).notNull().default("nueva").$type<ConsultaStatus>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("ix_consultas_anuncio").on(t.anuncioId)]
+  (t) => [
+    foreignKey({
+      name: "consultas_anuncio_id_anuncios_id_fk",
+      columns: [t.anuncioId],
+      foreignColumns: [anunciosTable.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "consultas_user_id_users_id_fk",
+      columns: [t.userId],
+      foreignColumns: [usersTable.id],
+    }).onDelete("set null"),
+    index("ix_consultas_anuncio").on(t.anuncioId),
+  ]
 )
 
 export const favoritosTable = pgTable(
-  "favoritos",
+  "product_wishlist",
   {
-    userId: integer("user_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
-    anuncioId: integer("anuncio_id")
-      .notNull()
-      .references(() => anunciosTable.id, { onDelete: "cascade" }),
+    userId: integer("user_id").notNull(),
+    anuncioId: integer("anuncio_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [primaryKey({ columns: [t.userId, t.anuncioId] })]
+  (t) => [
+    foreignKey({
+      name: "favoritos_user_id_users_id_fk",
+      columns: [t.userId],
+      foreignColumns: [usersTable.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "favoritos_anuncio_id_anuncios_id_fk",
+      columns: [t.anuncioId],
+      foreignColumns: [anunciosTable.id],
+    }).onDelete("cascade"),
+    primaryKey({ name: "favoritos_user_id_anuncio_id_pk", columns: [t.userId, t.anuncioId] }),
+  ]
 )

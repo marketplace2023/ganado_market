@@ -1,6 +1,7 @@
 import { db, type Transaction } from "#database/connection.ts"
 import {
   anunciosTable,
+  pujasTable,
   reservasAnuncioTable,
   subastaLotesTable,
   subastasTable,
@@ -11,13 +12,13 @@ import { and, eq, gt, isNull, lte, sql, type SQL } from "drizzle-orm"
 
 export function reservaVigenteEn(anuncioId: SQL) {
   return sql<boolean>`exists (
-    select 1 from reservas_anuncio r
+    select 1 from ${reservasAnuncioTable} r
     where r.anuncio_id = ${anuncioId}
       and r.ended_at is null and r.expires_at > statement_timestamp()
   )`
 }
 
-export const anuncioReservado = reservaVigenteEn(sql`"anuncios"."id"`)
+export const anuncioReservado = reservaVigenteEn(sql`${anunciosTable}."id"`)
 export const anuncioDisponible = and(eq(anunciosTable.status, "publicado"), sql`not ${anuncioReservado}`)!
 
 export const ultimaReservaAnuncio = sql<ReservaAnuncio | null>`(
@@ -26,7 +27,7 @@ export const ultimaReservaAnuncio = sql<ReservaAnuncio | null>`(
     'modalidadPrecio', r.modalidad_precio, 'expiresAt', r.expires_at,
     'resultado', coalesce(r.resultado, case when r.expires_at <= statement_timestamp() then 'vencida' end)
   )
-  from reservas_anuncio r where r.anuncio_id = "anuncios"."id"
+  from ${reservasAnuncioTable} r where r.anuncio_id = ${anunciosTable}."id"
   order by r.id desc limit 1
 )`
 
@@ -112,7 +113,7 @@ export async function crearReserva(anuncioId: number, ownerId: number, dto: Rese
             ${subastasTable.status} in ('borrador', 'pendiente')
             or (${subastasTable.status} = 'programada' and ${subastasTable.endsAt} > statement_timestamp())
             or (${subastasTable.status} in ('programada', 'finalizada') and exists (
-              select 1 from pujas p where p.lote_id = "subasta_lotes"."id"
+              select 1 from ${pujasTable} p where p.lote_id = ${subastaLotesTable}."id"
             ))
           )`
         )

@@ -1,15 +1,13 @@
 import type { FincaVerificacion } from "@workspace/shared"
-import { index, integer, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core"
+import { foreignKey, index, integer, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core"
 import { usersTable } from "./users.ts"
 
 /** Finca / hato: el "perfil de vendedor" del ganadero. Un ganadero puede tener varias. */
 export const fincasTable = pgTable(
-  "fincas",
+  "livestock_farm",
   {
     id: serial("id").primaryKey(),
-    ownerId: integer("owner_id")
-      .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
+    ownerId: integer("owner_id").notNull(),
     name: varchar("name", { length: 120 }).notNull(),
     slug: varchar("slug", { length: 140 }).notNull().unique("uk_fincas_slug"),
     estado: varchar("estado", { length: 40 }).notNull(),
@@ -33,5 +31,12 @@ export const fincasTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (t) => [index("ix_fincas_owner").on(t.ownerId)]
+  (t) => [
+    foreignKey({
+      name: "fincas_owner_id_users_id_fk",
+      columns: [t.ownerId],
+      foreignColumns: [usersTable.id],
+    }).onDelete("cascade"),
+    index("ix_fincas_owner").on(t.ownerId),
+  ]
 )

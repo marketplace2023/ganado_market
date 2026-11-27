@@ -126,8 +126,8 @@ usuariosRoutes.get(
         : undefined,
       q.role
         ? sql`exists (
-            select 1 from users_to_roles ur join roles r on r.id = ur.role_id
-            where ur.user_id = "users"."id" and r.name = ${q.role}
+            select 1 from ${usersToRolesTable} ur join ${rolesTable} r on r.id = ur.role_id
+            where ur.user_id = ${usersTable}."id" and r.name = ${q.role}
           )`
         : undefined
     )
@@ -144,8 +144,8 @@ usuariosRoutes.get(
           status: usersTable.status,
           createdAt: usersTable.createdAt,
           roles: sql<string[]>`coalesce((
-            select array_agg(r.name order by r.name) from users_to_roles ur
-            join roles r on r.id = ur.role_id where ur.user_id = "users"."id"
+            select array_agg(r.name order by r.name) from ${usersToRolesTable} ur
+            join ${rolesTable} r on r.id = ur.role_id where ur.user_id = ${usersTable}."id"
           ), '{}')`,
         })
         .from(usersTable)

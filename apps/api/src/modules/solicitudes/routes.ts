@@ -45,7 +45,7 @@ const columns = {
   expiresAt: solicitudesTable.expiresAt,
   autorName: usersTable.name,
   contactosCount: sql<number>`(
-    select count(*)::int from solicitud_contactos sc where sc.solicitud_id = "solicitudes"."id"
+    select count(*)::int from ${solicitudContactosTable} sc where sc.solicitud_id = ${solicitudesTable}."id"
   )`,
 }
 

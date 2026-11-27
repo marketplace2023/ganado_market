@@ -1,8 +1,10 @@
 import { db } from "#database/connection.ts"
 import {
+  anuncioMediaTable,
   anunciosTable,
   especiesTable,
   fincasTable,
+  pujasTable,
   razasTable,
   subastaLotesTable,
   subastasTable,
@@ -37,12 +39,12 @@ export const subastaCardColumns = {
   estado: fincasTable.estado,
   ownerName: usersTable.name,
   lotesCount: sql<number>`(
-    select count(*)::int from subasta_lotes l where l.subasta_id = "subastas"."id"
+    select count(*)::int from ${subastaLotesTable} l where l.subasta_id = ${subastasTable}."id"
   )`,
   coverUrl: sql<string | null>`(
-    select m.url from subasta_lotes l
-    join anuncio_media m on m.anuncio_id = l.anuncio_id
-    where l.subasta_id = "subastas"."id"
+    select m.url from ${subastaLotesTable} l
+    join ${anuncioMediaTable} m on m.anuncio_id = l.anuncio_id
+    where l.subasta_id = ${subastasTable}."id"
     order by l.orden asc, m.sort_order asc limit 1
   )`,
 }
@@ -71,15 +73,15 @@ export async function getLotes(subastaId: number, includeBidder = false) {
       precioBaseUsd: subastaLotesTable.precioBaseUsd,
       incrementoUsd: subastaLotesTable.incrementoUsd,
       mejorPujaUsd: sql<number | null>`(
-        select max(p.monto_usd)::float8 from pujas p where p.lote_id = "subasta_lotes"."id"
+        select max(p.monto_usd)::float8 from ${pujasTable} p where p.lote_id = ${subastaLotesTable}."id"
       )`,
       pujasCount: sql<number>`(
-        select count(*)::int from pujas p where p.lote_id = "subasta_lotes"."id"
+        select count(*)::int from ${pujasTable} p where p.lote_id = ${subastaLotesTable}."id"
       )`,
       mejorPostor: sql<string | null>`(
-        select u.name || ' · ' || coalesce(u.phone, u.email) from pujas p
-        join users u on u.id = p.user_id
-        where p.lote_id = "subasta_lotes"."id"
+        select u.name || ' · ' || coalesce(u.phone, u.email) from ${pujasTable} p
+        join ${usersTable} u on u.id = p.user_id
+        where p.lote_id = ${subastaLotesTable}."id"
         order by p.monto_usd desc, p.created_at asc limit 1
       )`,
       anuncio: anuncioCardColumns,

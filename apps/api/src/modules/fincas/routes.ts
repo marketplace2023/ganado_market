@@ -1,5 +1,5 @@
 import { db } from "#database/connection.ts"
-import { fincasTable, usersTable } from "#database/schemas/index.ts"
+import { anunciosTable, fincasTable, usersTable } from "#database/schemas/index.ts"
 import { audit } from "#modules/admin/audit.ts"
 import { reservaVigenteEn } from "#modules/anuncios/reservas.ts"
 import { authRequired, requireRole, type AppEnv } from "#modules/shared/http/auth.ts"
@@ -31,8 +31,8 @@ const ownedColumns = {
   ...getTableColumns(fincasTable),
   verificada: sql<boolean>`${fincasTable.verificacion} = 'verificada'`,
   anunciosCount: sql<number>`(
-    select count(*)::int from anuncios a
-    where a.finca_id = "fincas"."id" and a.status = 'publicado'
+    select count(*)::int from ${anunciosTable} a
+    where a.finca_id = ${fincasTable}."id" and a.status = 'publicado'
   )`,
 }
 
@@ -57,8 +57,8 @@ fincasRoutes.get("/:slug", async (c) => {
     .select({
       ...publicColumns,
       anunciosCount: sql<number>`(
-        select count(*)::int from anuncios a
-        where a.finca_id = "fincas"."id" and a.status = 'publicado'
+        select count(*)::int from ${anunciosTable} a
+        where a.finca_id = ${fincasTable}."id" and a.status = 'publicado'
           and not ${reservaVigenteEn(sql`a.id`)}
       )`,
     })

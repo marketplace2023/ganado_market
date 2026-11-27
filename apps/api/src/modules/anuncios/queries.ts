@@ -2,6 +2,7 @@ import { db } from "#database/connection.ts"
 import {
   anuncioMediaTable,
   anunciosTable,
+  consultasTable,
   especiesTable,
   fincasTable,
   razasTable,
@@ -34,8 +35,8 @@ export const anuncioCardColumns = {
   fincaSlug: fincasTable.slug,
   fincaVerificada: sql<boolean>`coalesce(${fincasTable.verificacion} = 'verificada', false)`,
   thumbnailUrl: sql<string | null>`(
-    select m.url from anuncio_media m
-    where m.anuncio_id = "anuncios"."id"
+    select m.url from ${anuncioMediaTable} m
+    where m.anuncio_id = ${anunciosTable}."id"
     order by m.sort_order asc limit 1
   )`,
   publishedAt: anunciosTable.publishedAt,
@@ -50,7 +51,7 @@ export const anuncioOwnedColumns = {
   viewCount: anunciosTable.viewCount,
   whatsappClicks: anunciosTable.whatsappClicks,
   consultasCount: sql<number>`(
-    select count(*)::int from consultas c where c.anuncio_id = "anuncios"."id"
+    select count(*)::int from ${consultasTable} c where c.anuncio_id = ${anunciosTable}."id"
   )`,
   createdAt: anunciosTable.createdAt,
 }

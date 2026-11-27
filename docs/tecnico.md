@@ -1,6 +1,6 @@
 # Documentación técnica de GanadoMarket
 
-**Repositorio de referencia** `marketplace2023/ganado_market` · rama `main` · código base `e8b14fe`
+**Repositorio de referencia** `marketplace2023/ganado_market` · rama `main`
 
 GanadoMarket es un marketplace ganadero para Venezuela. El sitio público permite buscar ganado y proveedores, consultar anuncios, contactar vendedores y seguir remates. El panel ganadero concentra fincas, anuncios, consultas, reservas y remates. El panel administrativo verifica fincas, modera contenido y administra usuarios, catálogos y parámetros de operación.
 
@@ -101,7 +101,7 @@ Fuente: [solicitudes](../apps/api/src/modules/solicitudes/routes.ts), [consultas
 
 ### Moneda, medios y directorio
 
-- Los importes se guardan en USD. La web muestra la equivalencia referencial en bolívares usando la tasa BCV de `settings`. El modo automático consulta `ve.dolarapi.com` con respaldo en `bcv.org.ve`. Si las fuentes fallan, conserva la última tasa disponible. El API revisa la tasa al arrancar y cada hora, e intenta actualizarla cuando falta o tiene más de tres horas.
+- Los importes se guardan en USD. La web muestra la equivalencia referencial en bolívares usando la tasa BCV de `ir_config_parameter`. El modo automático consulta `ve.dolarapi.com` con respaldo en `bcv.org.ve`. Si las fuentes fallan, conserva la última tasa disponible. El API revisa la tasa al arrancar y cada hora, e intenta actualizarla cuando falta o tiene más de tres horas.
 - La subida de imágenes acepta JPG, PNG o WebP de hasta 5 MiB. Con Cloudinary configurado devuelve una URL HTTPS. El almacenamiento local de desarrollo guarda archivos en `uploads/`. Las imágenes ilustrativas de los seeders se sirven desde [assets/demo-images](../apps/api/assets/demo-images) y se actualizan en datos demo existentes cuando falta la imagen.
 - El directorio lista servicios activos por tipo y estado. Al vincular una ficha a una cuenta, el API puede asignarle el rol de transportista o veterinario según el tipo de servicio.
 
@@ -111,33 +111,42 @@ Fuente: [tasa y configuración](../apps/api/src/modules/catalogo/settings.ts), [
 
 El último snapshot de Drizzle define **21 tablas de aplicación**. Las claves de relación y nombres de columnas de esta sección están en formato SQL. El API usa principalmente `camelCase`. Los IDs de entidad suelen ser enteros autoincrementales. Las tablas de unión usan claves compuestas, y los precios se guardan en columnas `numeric`.
 
-| Tabla | Datos y propósito | Claves y relaciones |
-| --- | --- | --- |
-| `users` | Cuenta, hash de contraseña, teléfono, documento y estado. | PK `id`. `email` y `document_number` únicos. |
-| `roles` | Catálogo de roles y descripción. | PK `id`, `name` único. |
-| `users_to_roles` | Asignación múltiple de roles. | PK `(user_id, role_id)`; FK a `users` y `roles`. |
-| `password_resets` | Hash del token, vencimiento, uso y creación. | PK `id`; FK `user_id` a `users`; `token_hash` único. |
-| `especies` | Especie, nombre, slug, icono y orden. | PK `id`, `slug` único. |
-| `razas` | Raza y propósito productivo. | PK `id`, `slug` único; FK `especie_id` a `especies`. |
-| `settings` | Valores de tasa, modo y datos de soporte. | PK `key`; columnas `value` y `updated_at`. |
-| `fincas` | Identidad, ubicación, superficie, medios y verificación. | PK `id`; FK `owner_id` a `users`; `slug` único. |
-| `anuncios` | Oferta, inventario, precio en USD, estado, datos sanitarios y contadores. | PK `id`; FK a `users`, `fincas`, `especies` y opcionalmente `razas`; `slug` único. |
-| `anuncio_media` | URL y posición de cada imagen. | PK `id`; FK `anuncio_id` a `anuncios`. |
-| `reservas_anuncio` | Cantidad, precio acordado, modalidad, vigencia y resultado. | PK `id`; FK `anuncio_id` a `anuncios`; único `(anuncio_id, solicitud_id)`; límite de una fila abierta por anuncio mediante índice parcial. |
-| `consultas` | Nombre, teléfono, correo, mensaje y estado de una consulta. | PK `id`; FK `anuncio_id` a `anuncios`; FK opcional `user_id` a `users`. |
-| `favoritos` | Relación entre una cuenta y un anuncio guardado. | PK `(user_id, anuncio_id)`; FK a `users` y `anuncios`. |
-| `solicitudes` | Demanda de compra, cantidad, rangos de peso y presupuesto, urgencia y vencimiento. | PK `id`; FK `user_id` a `users`; FK opcional `especie_id` a `especies`. |
-| `solicitud_contactos` | Registro de acceso al contacto del autor. | PK `(solicitud_id, user_id)`; FK a `solicitudes` y `users`. |
-| `subastas` | Remate, propietario, finca, fechas y estado almacenado. | PK `id`; FK `owner_id` a `users` y `finca_id` a `fincas`; `slug` único. |
-| `subasta_lotes` | Anuncio incluido en un remate, orden, precio base e incremento. | PK `id`; FK a `subastas` y `anuncios`; único `(subasta_id, anuncio_id)`. |
-| `pujas` | Postor, importe en USD y fecha. | PK `id`; FK `lote_id` a `subasta_lotes` y `user_id` a `users`. |
-| `servicios` | Ficha del proveedor, tipo, contacto, estados, verificación y visibilidad. | PK `id`; FK opcional `user_id` a `users`. |
-| `denuncias` | Motivo, detalle, estado, reportante y resolución. | PK `id`; FK a `anuncios` y dos FK opcionales a `users`; único `(anuncio_id, user_id)`. |
-| `audit_log` | Acción, entidad, ID, resumen y copia del nombre y correo del administrador. | PK `id`; FK opcional `admin_id` a `users`. Los datos copiados preservan el historial al borrar la cuenta. |
+| Tabla actual | Nombre anterior | Datos y propósito | Claves y relaciones |
+| --- | --- | --- | --- |
+| `res_users` | `users` | Cuenta, hash de contraseña, teléfono, documento y estado. | PK `id`. `email` y `document_number` únicos. |
+| `res_groups` | `roles` | Catálogo de roles y descripción. | PK `id`, `name` único. |
+| `res_groups_users_rel` | `users_to_roles` | Asignación múltiple de roles. | PK `(user_id, role_id)`; FK a `res_users` y `res_groups`. |
+| `livestock_password_reset` | `password_resets` | Hash del token, vencimiento, uso y creación. | PK `id`; FK `user_id` a `res_users`; `token_hash` único. |
+| `livestock_species` | `especies` | Especie, nombre, slug, icono y orden. | PK `id`, `slug` único. |
+| `livestock_breed` | `razas` | Raza y propósito productivo. | PK `id`, `slug` único; FK `especie_id` a `livestock_species`. |
+| `ir_config_parameter` | `settings` | Valores de tasa, modo y datos de soporte. | PK `key`; columnas `value` y `updated_at`. |
+| `livestock_farm` | `fincas` | Identidad, ubicación, superficie, medios y verificación. | PK `id`; FK `owner_id` a `res_users`; `slug` único. |
+| `livestock_listing` | `anuncios` | Oferta, inventario, precio en USD, estado, datos sanitarios y contadores. | PK `id`; FK a `res_users`, `livestock_farm`, `livestock_species` y opcionalmente `livestock_breed`; `slug` único. |
+| `product_image` | `anuncio_media` | URL y posición de cada imagen. | PK `id`; FK `anuncio_id` a `livestock_listing`. |
+| `livestock_listing_reservation` | `reservas_anuncio` | Cantidad, precio acordado, modalidad, vigencia y resultado. | PK `id`; FK `anuncio_id` a `livestock_listing`; único `(anuncio_id, solicitud_id)`; límite de una fila abierta por anuncio mediante índice parcial. |
+| `crm_lead` | `consultas` | Nombre, teléfono, correo, mensaje y estado de una consulta. | PK `id`; FK `anuncio_id` a `livestock_listing`; FK opcional `user_id` a `res_users`. |
+| `product_wishlist` | `favoritos` | Relación entre una cuenta y un anuncio guardado. | PK `(user_id, anuncio_id)`; FK a `res_users` y `livestock_listing`. |
+| `livestock_purchase_request` | `solicitudes` | Demanda de compra, cantidad, rangos de peso y presupuesto, urgencia y vencimiento. | PK `id`; FK `user_id` a `res_users`; FK opcional `especie_id` a `livestock_species`. |
+| `livestock_purchase_request_contact` | `solicitud_contactos` | Registro de acceso al contacto del autor. | PK `(solicitud_id, user_id)`; FK a `livestock_purchase_request` y `res_users`. |
+| `livestock_auction` | `subastas` | Remate, propietario, finca, fechas y estado almacenado. | PK `id`; FK `owner_id` a `res_users` y `finca_id` a `livestock_farm`; `slug` único. |
+| `livestock_auction_lot` | `subasta_lotes` | Anuncio incluido en un remate, orden, precio base e incremento. | PK `id`; FK a `livestock_auction` y `livestock_listing`; único `(subasta_id, anuncio_id)`. |
+| `livestock_auction_bid` | `pujas` | Postor, importe en USD y fecha. | PK `id`; FK `lote_id` a `livestock_auction_lot` y `user_id` a `res_users`. |
+| `livestock_service` | `servicios` | Ficha del proveedor, tipo, contacto, estados, verificación y visibilidad. | PK `id`; FK opcional `user_id` a `res_users`. |
+| `livestock_listing_report` | `denuncias` | Motivo, detalle, estado, reportante y resolución. | PK `id`; FK a `livestock_listing` y dos FK opcionales a `res_users`; único `(anuncio_id, user_id)`. |
+| `livestock_audit_log` | `audit_log` | Acción, entidad, ID, resumen y copia del nombre y correo del administrador. | PK `id`; FK opcional `admin_id` a `res_users`. Los datos copiados preservan el historial al borrar la cuenta. |
 
 La eliminación de un anuncio elimina en cascada sus medios, reservas, favoritos y consultas. El API del ganadero impide borrarlo si tiene una reserva vigente o está referenciado en un remate. Al eliminar usuarios se aplican cascadas y relaciones anulables según la tabla. El API administrativo impide borrar la cuenta propia, el último administrador y cuentas que cumplen las condiciones de participación en remates activos. La raza borrada queda como referencia nula en los anuncios.
 
-Fuentes: [esquemas TypeScript](../apps/api/src/database/schemas), [snapshot de PostgreSQL](../apps/api/drizzle/meta/0003_snapshot.json) y [migraciones](../apps/api/drizzle).
+### Equivalencias con Odoo
+
+- `res_users`, `res_groups` y `res_groups_users_rel` corresponden a las cuentas, grupos y asignaciones de usuarios a grupos. [Usuarios](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_users.py) · [Grupos y relación](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/res_groups.py)
+- `ir_config_parameter` corresponde a parámetros clave–valor, y `crm_lead` a consultas comerciales. [Parámetros](https://github.com/odoo/odoo/blob/19.0/odoo/addons/base/models/ir_config_parameter.py) · [CRM](https://github.com/odoo/odoo/blob/19.0/addons/crm/models/crm_lead.py)
+- `product_image` corresponde a imágenes de catálogo y `product_wishlist` a favoritos, tomando como referencia los módulos de comercio electrónico. [Imágenes](https://github.com/odoo/odoo/blob/19.0/addons/website_sale/models/product_image.py) · [Favoritos](https://github.com/odoo/odoo/blob/19.0/addons/website_sale_wishlist/models/product_wishlist.py)
+- Las tablas `livestock_*` representan funciones propias, como el ciclo de un anuncio, las reservas, los remates, la demanda pública y la moderación. Los anuncios y las solicitudes conservan nombres propios porque representan ofertas del marketplace y pedidos de contacto, respectivamente.
+
+Estas equivalencias son nominales. Las tablas siguen perteneciendo a GanadoMarket y conservan sus columnas, restricciones y comportamiento. Una integración con Odoo requeriría adaptar el esquema y definir cómo sincronizar los datos.
+
+Fuentes: [esquemas TypeScript](../apps/api/src/database/schemas), [snapshot de PostgreSQL](../apps/api/drizzle/meta/0004_snapshot.json) y [migraciones](../apps/api/drizzle).
 
 ## Referencia HTTP
 
@@ -386,6 +395,7 @@ npm run dev
 | [0001](../apps/api/drizzle/0001_silly_lockjaw.sql) | Solicitudes, accesos a contactos, recuperación de contraseña y campo de desparasitación. |
 | [0002](../apps/api/drizzle/0002_silent_synch.sql) | Denuncias e historial administrativo. |
 | [0003](../apps/api/drizzle/0003_reservas_anuncio.sql) | Reservas privadas y restricciones de unicidad. |
+| [0004](../apps/api/drizzle/0004_odoo_table_names.sql) | Renombra las 21 tablas con `ALTER TABLE … RENAME TO`. Conserva sus registros, columnas, índices y restricciones. Aplicar en coordinación con el despliegue del API que usa los nombres nuevos. |
 
 ## Límites y diagnóstico
 
@@ -393,7 +403,7 @@ npm run dev
 - El estado de reserva por sí solo no identifica al comprador ni valida el pago o la entrega. El control de exclusión opera por ID de anuncio y depende del vendedor para evitar duplicar el mismo ganado en otras fichas o canales.
 - Los eventos de auditoría del administrador se guardan por separado de muchas escrituras de negocio. El historial cubre las acciones que llaman a `audit()`.
 - La caducidad de reservas y solicitudes se calcula al consultar. El estado visible de los remates depende de las fechas. El proceso periódico del API se dedica a la tasa BCV.
-- Si el API inicia y `/anuncios` devuelve `500` con `ECONNREFUSED`, comprobar Docker y `DATABASE_URL`, especialmente el puerto local `5433`. Si PostgreSQL reporta que falta `reservas_anuncio`, comprobar el journal de migraciones y aplicar las pendientes.
+- Si el API inicia y `/anuncios` devuelve `500` con `ECONNREFUSED`, comprobar Docker y `DATABASE_URL`, especialmente el puerto local `5433`. Si PostgreSQL reporta que falta `livestock_listing_reservation`, comprobar el journal de migraciones y si el API y la base usan la misma versión de los nombres.
 - Un `200` en `GET /` confirma que el servidor HTTP escucha. Para comprobar conectividad con PostgreSQL, consultar también `GET /catalogo/especies`.
 
 ## Fuentes de mantenimiento

@@ -70,8 +70,8 @@ denunciasAdminRoutes.get(
           ownerEmail: owner.email,
         },
         denunciasDelAnuncio: sql<number>`(
-          select count(*)::int from denuncias d2
-          where d2.anuncio_id = "denuncias"."anuncio_id" and d2.status = 'pendiente'
+          select count(*)::int from ${denunciasTable} d2
+          where d2.anuncio_id = ${denunciasTable}."anuncio_id" and d2.status = 'pendiente'
         )`,
       })
       .from(denunciasTable)

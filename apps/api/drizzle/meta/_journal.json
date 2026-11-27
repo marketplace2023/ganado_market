@@ -29,6 +29,13 @@
       "when": 1795790066177,
       "tag": "0003_reservas_anuncio",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795793324585,
+      "tag": "0004_odoo_table_names",
+      "breakpoints": true
     }
   ]
 }
