@@ -1,0 +1,43 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Backend del marketplace ganadero (Hono + Drizzle + PostgreSQL)",
+  "imports": {
+    "#*": "./src/*"
+  },
+  "scripts": {
+    "dev": "node --watch --watch-preserve-output --import tsx src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "node --import tsx src/database/seeds/index.ts",
+    "db:seed:demo": "node --import tsx src/database/seeds/demo.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.14",
+    "@workspace/shared": "*",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.23",
+    "nodemailer": "^8.0.11",
+    "pg": "^8.16.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.15.5",
+    "drizzle-kit": "^0.31.10",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "~6.0.2"
+  }
+}

@@ -1,0 +1,22 @@
+# Sitio público. En Netlify: Base directory = apps/web
+# Reemplaza REPLACE_WITH_API_URL por la URL del API en Render (ej. https://ganado-market-api.onrender.com)
+[build]
+  command = "cd ../.. && npm ci && npx turbo build --filter=web"
+  publish = "dist"
+
+[[redirects]]
+  from = "/api/*"
+  to = "REPLACE_WITH_API_URL/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "REPLACE_WITH_API_URL/uploads/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

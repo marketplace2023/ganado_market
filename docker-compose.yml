@@ -1,0 +1,23 @@
+# Postgres local para desarrollo (en producción se usa Neon).
+#   npm run db:up
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: ganado-market-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ganado
+      POSTGRES_PASSWORD: ganado
+      POSTGRES_DB: ganado
+    ports:
+      - "5433:5432"
+    volumes:
+      - ganado-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ganado -d ganado"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ganado-db:

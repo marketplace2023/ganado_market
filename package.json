@@ -2,12 +2,25 @@
   "name": "ganado-market",
   "version": "0.0.1",
   "private": true,
+  "description": "Ecosistema marketplace ganadero para Venezuela (monorepo: api, web, ganadero, admin)",
   "scripts": {
-    "build": "turbo build",
     "dev": "turbo dev",
+    "dev:api": "turbo dev --filter=api",
+    "dev:web": "turbo dev --filter=web --filter=api",
+    "dev:ganadero": "turbo dev --filter=ganadero --filter=api",
+    "dev:admin": "turbo dev --filter=admin --filter=api",
+    "build": "turbo build",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:generate": "npm run db:generate -w api",
+    "db:migrate": "npm run db:migrate -w api",
+    "db:push": "npm run db:push -w api",
+    "db:seed": "npm run db:seed -w api",
+    "db:seed:demo": "npm run db:seed:demo -w api",
+    "db:studio": "npm run db:studio -w api"
   },
   "devDependencies": {
     "prettier": "^3.10.1",

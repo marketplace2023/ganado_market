@@ -1,0 +1,45 @@
+# Blueprint de Render para el API (mismo esquema que agro-backend, adaptado al monorepo).
+# Los frontends (web, ganadero, admin) se despliegan en Netlify, cada uno con su netlify.toml.
+services:
+  - type: web
+    name: ganado-market-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npx turbo build --filter=api
+    startCommand: node apps/api/dist/index.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WEB_URL
+        sync: false
+      - key: GANADERO_URL
+        sync: false
+      - key: ADMIN_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
