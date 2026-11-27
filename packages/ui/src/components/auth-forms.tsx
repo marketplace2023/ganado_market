@@ -10,9 +10,10 @@ import {
   type ResetPasswordDto,
 } from "@workspace/shared"
 import { AlertCircle } from "lucide-react"
-import { cn } from "cn"
+import { BackgroundGradient } from "./background-gradient"
 import { Button } from "./button"
 import { FormField } from "./form-field"
+import { GridPattern } from "./grid-pattern"
 import { Input } from "./input"
 import { Logo } from "./logo"
 import { NativeSelect, NativeSelectOption } from "./native-select"
@@ -32,47 +33,31 @@ export function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-svh flex-col lg:flex-row">
-      <aside className={cn(
-        "relative isolate flex-col justify-between overflow-hidden bg-sidebar text-sidebar-foreground lg:flex lg:w-[46%] lg:shrink-0",
-        image
-          ? "flex min-h-36 p-6 sm:min-h-48 lg:sticky lg:top-0 lg:h-svh lg:self-start lg:p-10 xl:p-12"
-          : "hidden p-10"
-      )}>
-        {image ? (
-          <>
-            <img
-              src={image.src}
-              alt=""
-              fetchPriority="high"
-              className="absolute inset-0 -z-10 size-full object-cover"
-              style={{ objectPosition: image.position ?? "center 46%" }}
-            />
-            <div className="pointer-events-none absolute inset-0 -z-10 bg-linear-to-b from-black/75 via-black/10 to-black/85" />
-          </>
-        ) : (
-          <div className="pointer-events-none absolute -bottom-32 -left-24 size-[28rem] rounded-full bg-sidebar-primary/10 blur-3xl" />
+    <main className="mx-auto grid min-h-svh w-full max-w-[96rem] content-start gap-5 p-4 sm:p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
+      <aside className="brand-surface auth-brand relative isolate flex min-h-44 flex-col justify-between gap-9 overflow-hidden rounded-2xl p-5 sm:min-h-52 sm:p-7 lg:sticky lg:top-6 lg:min-h-[calc(100svh-3rem)] lg:gap-20 lg:p-10 xl:p-12">
+        {image && (
+          <img
+            src={image.src}
+            alt=""
+            fetchPriority="high"
+            className="absolute inset-0 -z-20 size-full object-cover"
+            style={{ objectPosition: image.position ?? "center 46%" }}
+          />
         )}
-        <Logo subtitle={subtitle} inverted className="relative" />
-        <div className={cn("relative", image && "hidden lg:block")}>
-          <h2 className="max-w-md text-4xl leading-tight font-semibold text-balance">{headline}</h2>
-          <p className={cn("mt-4 max-w-sm", image ? "text-white/90" : "text-sidebar-foreground/70")}>
-            {description}
-          </p>
+        <div aria-hidden="true" className="auth-veil absolute inset-0 -z-10" />
+        <GridPattern size={30} className="text-white/18 mask-[radial-gradient(ellipse_at_top_right,#000,transparent_72%)]" />
+        <Logo subtitle={subtitle} inverted className="relative w-fit" />
+        <div className="relative max-w-lg">
+          <p className="font-heading text-[1.6rem] leading-[1.06] font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl xl:text-[3.8rem]">{headline}</p>
+          <p className="mt-4 hidden max-w-md text-sm leading-relaxed text-white/90 lg:block lg:text-base">{description}</p>
         </div>
-        {!image && <p className="text-xs text-sidebar-foreground/40">GanadoMarket Venezuela</p>}
       </aside>
-      <div className={cn("flex flex-1 justify-center p-6 sm:p-10", image ? "items-start lg:items-center" : "items-center")}>
-        <div className="w-full max-w-sm">
-          {!image && (
-            <div className="mb-8 lg:hidden">
-              <Logo subtitle={subtitle} />
-            </div>
-          )}
+      <div className="flex w-full items-center justify-center pb-5 lg:min-h-[calc(100svh-3rem)] lg:py-6">
+        <BackgroundGradient containerClassName="w-full max-w-[31rem]" className="auth-form bg-card p-6 sm:p-9 xl:p-11">
           {children}
-        </div>
+        </BackgroundGradient>
       </div>
-    </div>
+    </main>
   )
 }
 

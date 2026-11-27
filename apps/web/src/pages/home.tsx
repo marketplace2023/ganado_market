@@ -10,8 +10,9 @@ import {
 } from "@workspace/shared"
 import { SolicitudCard } from "@workspace/ui/components/solicitud-card"
 import { ContactoSolicitud } from "@/components/contacto-solicitud"
-import { Spotlight } from "@/components/ui/spotlight"
+import { BackgroundGradient } from "@workspace/ui/components/background-gradient"
 import { Button, buttonVariants } from "@workspace/ui/components/button"
+import { GridPattern } from "@workspace/ui/components/grid-pattern"
 import { NativeSelect, NativeSelectOption } from "@workspace/ui/components/native-select"
 import { cn } from "cn"
 import {
@@ -20,6 +21,7 @@ import {
   ClipboardList,
   FileCheck2,
   Gavel,
+  MapPin,
   MessageCircle,
   Search,
   Stethoscope,
@@ -35,6 +37,8 @@ const BorderBeam = lazy(async () => {
   const { BorderBeam } = await import("@workspace/ui/components/border-beam")
   return { default: BorderBeam }
 })
+
+const portada = new URL("../../../api/assets/demo-images/hato-los-samanes.webp", import.meta.url).href
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -67,79 +71,82 @@ export function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-[#102e25] text-[#fffaee]">
-        <Spotlight className="-top-1/2 -left-1/4 opacity-70" fill="#b9d49a" />
-        <div className="relative mx-auto grid max-w-7xl gap-x-10 gap-y-6 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-2 lg:items-start lg:py-16">
-          <div className="lg:self-end">
-            <h1 className="max-w-xl text-4xl leading-[1.02] font-semibold tracking-tight text-balance sm:text-5xl xl:text-6xl">
-              Compra y vende ganado <span className="text-[#c1d99c]">en Venezuela.</span>
-            </h1>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-[#e1e8d9] sm:text-lg">
-              Encuentra lotes y ejemplares, contacta al productor y consulta precios en dólares con referencia BCV.
-            </p>
-          </div>
+      <section className="relative isolate overflow-hidden border-b bg-[#f4f3e6]">
+        <GridPattern size={34} className="text-[#315d43]/12 mask-[radial-gradient(ellipse_at_0_0,#000,transparent_65%)]" />
+        <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-6 sm:px-6 sm:pt-12 lg:pt-13">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:items-center lg:gap-11">
+            <div className="py-2 lg:pb-10">
+              <h1 className="max-w-[13ch] font-heading text-[clamp(2.7rem,6.2vw,5.65rem)] leading-[.98] font-semibold tracking-[-.055em] text-[#142d24]">
+                Compra y vende ganado <em className="font-medium text-[#315d43]">en Venezuela.</em>
+              </h1>
+              <p className="mt-4 max-w-[43ch] text-base leading-relaxed text-[#47554a] sm:mt-6 sm:text-lg">
+                Encuentra lotes y ejemplares, compara precios en dólares y contacta directamente al productor.
+              </p>
+              <Link to="/fincas?vista=mapa" className="mt-4 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[#20533a] hover:underline sm:mt-5">
+                <MapPin className="size-4" /> Explorar fincas en el mapa <ArrowRight className="size-4" />
+              </Link>
+            </div>
 
-          <div className="relative order-last aspect-[4/3] overflow-hidden rounded-[1.5rem] border border-white/20 bg-[#183c30] lg:order-0 lg:row-span-3 lg:aspect-auto lg:h-full lg:min-h-96">
-            <img
-              src="/api/demo-images/hato-los-samanes.webp"
-              alt="Ilustración de ganado Brahman en un hato de los llanos de Apure"
-              fetchPriority="high"
-              className="absolute inset-0 size-full object-cover"
-            />
-            <Suspense fallback={null}>
-              <BorderBeam
-                size={160}
-                duration={5}
-                colorFrom="#e9cf92"
-                colorTo="#a7c380"
-                transition={{ repeat: 0 }}
+            <BackgroundGradient containerClassName="lg:min-w-0" className="relative isolate aspect-[16/10] overflow-hidden bg-[#213d30] lg:aspect-[1.44]">
+              <img
+                src={portada}
+                alt="Ilustración de ganado Brahman en los llanos de Apure"
+                fetchPriority="high"
+                className="absolute inset-0 size-full object-cover object-center"
               />
-            </Suspense>
+              <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-[#13281d]/70 via-transparent to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-4 py-4 text-xs font-medium text-white sm:px-6 sm:text-sm lg:pb-14">
+                <span className="inline-flex items-center gap-1.5"><MapPin className="size-4" /> Llanos de Apure</span>
+                <span>Ilustración ganadera</span>
+              </div>
+              <Suspense fallback={null}>
+                <BorderBeam size={150} duration={5} colorFrom="#e9cf92" colorTo="#a7c380" transition={{ repeat: 0 }} />
+              </Suspense>
+            </BackgroundGradient>
           </div>
 
           <form
             onSubmit={buscar}
-            className="grid gap-2 rounded-2xl border border-white/20 bg-card p-2 text-foreground shadow-sm sm:grid-cols-[1fr_1fr_auto]"
+            role="search"
+            aria-label="Buscar ganado en el catálogo"
+            className="relative z-10 mt-4 grid items-end gap-3 rounded-2xl border bg-card p-3.5 shadow-[0_16px_40px_-25px_#19372e70] sm:grid-cols-2 sm:p-4 lg:-mt-8 lg:grid-cols-[1.25fr_1fr_1fr_auto] lg:gap-4"
           >
-            <div className="relative sm:col-span-3">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <label className="block min-w-0 sm:col-span-2 lg:col-span-1">
+              <span className="mb-1.5 block text-xs font-semibold text-foreground">¿Qué ganado buscas?</span>
               <input
+                type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Raza, tipo de animal o municipio…"
-                className="h-11 w-full rounded-lg bg-muted/35 pr-3 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                aria-label="Buscar"
+                placeholder="Raza, lote o municipio"
+                className="h-11 w-full rounded-lg border bg-muted/30 px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+            </label>
+            <div className="min-w-0">
+              <label htmlFor="inicio-especie" className="mb-1.5 block text-xs font-semibold">Especie</label>
+              <NativeSelect id="inicio-especie" className="w-full [&_select]:h-11" value={especie} onChange={(e) => setEspecie(e.target.value)}>
+                <NativeSelectOption value="">Todas las especies</NativeSelectOption>
+                {especies?.map((e) => <NativeSelectOption key={e.slug} value={e.slug}>{e.name}</NativeSelectOption>)}
+              </NativeSelect>
             </div>
-            <NativeSelect className="w-full [&_select]:h-11" value={especie} onChange={(e) => setEspecie(e.target.value)} aria-label="Especie">
-              <NativeSelectOption value="">Todas las especies</NativeSelectOption>
-              {especies?.map((e) => (
-                <NativeSelectOption key={e.slug} value={e.slug}>
-                  {e.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            <NativeSelect className="w-full [&_select]:h-11" value={estado} onChange={(e) => setEstado(e.target.value)} aria-label="Estado">
-              <NativeSelectOption value="">Toda Venezuela</NativeSelectOption>
-              {ESTADOS_VENEZUELA.map((e) => (
-                <NativeSelectOption key={e.slug} value={e.slug}>
-                  {e.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelect>
-            <Button type="submit" size="lg" className="h-11 px-5">
-              Buscar
+            <div className="min-w-0">
+              <label htmlFor="inicio-estado" className="mb-1.5 block text-xs font-semibold">Estado</label>
+              <NativeSelect id="inicio-estado" className="w-full [&_select]:h-11" value={estado} onChange={(e) => setEstado(e.target.value)}>
+                <NativeSelectOption value="">Toda Venezuela</NativeSelectOption>
+                {ESTADOS_VENEZUELA.map((e) => <NativeSelectOption key={e.slug} value={e.slug}>{e.name}</NativeSelectOption>)}
+              </NativeSelect>
+            </div>
+            <Button type="submit" size="lg" className="h-11 px-5 sm:col-span-2 lg:col-span-1">
+              <Search /> Buscar ganado
             </Button>
           </form>
 
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-[#d0dfc8]">Estados ganaderos</span>
+          <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
+            <span className="mr-1 text-xs font-semibold text-[#47554a]">Estados ganaderos</span>
             {ESTADOS_GANADEROS.slice(0, 6).map((e) => (
               <Link
                 key={e}
                 to={`/ganado?estado=${e}`}
-                className="rounded-full border border-white/25 px-3 py-1 transition-colors hover:border-[#c1d99c] hover:bg-white/10"
+                className="rounded-lg border border-[#daddca] bg-white/60 px-3 py-1.5 text-xs font-medium text-[#31533e] transition-colors hover:border-[#96aa8c] hover:bg-white"
               >
                 {estadoName(e)}
               </Link>
@@ -148,23 +155,25 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Especies */}
-      <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      {Boolean(especies?.length) && (
+      <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
+        <SectionTitle title="Explora por especie" href="/ganado" cta="Ir al catálogo" />
+        <div className="grid grid-cols-2 overflow-hidden rounded-2xl border bg-card sm:grid-cols-3 lg:grid-cols-6">
           {especies?.map((e) => (
             <Link
               key={e.slug}
               to={`/ganado?especie=${e.slug}`}
-              className="group rounded-xl border bg-card p-4 transition hover:border-primary/50 hover:shadow-sm"
+              className="group border-r border-b p-4 transition-colors hover:bg-secondary/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
             >
-              <p className="font-semibold group-hover:text-primary">{e.name}</p>
-              <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+              <p className="flex items-start justify-between gap-1 font-semibold group-hover:text-primary">{e.name} <ArrowRight className="size-4 shrink-0 text-primary/70" /></p>
+              <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
                 {e.razas.slice(0, 3).map((r) => r.name).join(", ")}
               </p>
             </Link>
           ))}
         </div>
       </section>
+      )}
 
       {/* Destacados */}
       <section className="mx-auto max-w-7xl px-4 pt-12 sm:px-6">
@@ -212,7 +221,7 @@ export function HomePage() {
 
       {/* Cómo funciona */}
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
-        <div className="grid gap-6 rounded-2xl border bg-card p-6 sm:p-8 lg:grid-cols-3">
+        <div className="grid gap-6 border-y border-[#cdd6bf] bg-[#eff2e6] p-6 sm:p-8 lg:grid-cols-[1.07fr_1fr_1fr]">
           {[
             {
               icon: BadgeCheck,
@@ -245,22 +254,23 @@ export function HomePage() {
 
       {/* CTA ganadero + servicios */}
       <section className="mx-auto grid max-w-7xl gap-4 px-4 pt-6 sm:px-6 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-2xl bg-primary p-8 text-primary-foreground">
-          <h2 className="text-2xl font-semibold">¿Tienes ganado para vender?</h2>
-          <p className="mt-2 max-w-lg text-primary-foreground/80">
+        <BackgroundGradient className="brand-surface isolate overflow-hidden p-6 sm:p-8">
+          <GridPattern className="text-white/20 mask-[linear-gradient(to_left,#000,transparent_70%)]" />
+          <h2 className="relative font-heading text-3xl font-semibold">¿Tienes ganado para vender?</h2>
+          <p className="relative mt-2 max-w-lg text-white/85">
             Registra tu finca, publica lotes o ejemplares con fotos y recibe consultas de compradores de
             todo el país. Publicar es gratis.
           </p>
           <a
             href={`${GANADERO_URL}/registro`}
-            className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "mt-6")}
+            className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "relative mt-6 h-10 px-4")}
           >
             Publicar mi ganado <ArrowRight />
           </a>
-        </div>
+        </BackgroundGradient>
         <Link
           to="/servicios"
-          className="flex flex-col justify-between rounded-2xl border bg-card p-8 transition hover:border-primary/50"
+          className="brand-lift flex flex-col justify-between rounded-2xl border bg-card p-6 hover:border-primary/50 sm:p-8"
         >
           <div className="flex gap-2 text-primary">
             <Truck className="size-6" />
@@ -290,8 +300,8 @@ function SectionTitle({
   icon?: typeof Gavel
 }) {
   return (
-    <div className="mb-5 flex items-end justify-between gap-4">
-      <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b pb-3">
+      <h2 className="flex items-center gap-2 font-heading text-3xl font-semibold tracking-tight">
         {Icon && <Icon className="size-6 text-primary" />}
         {title}
       </h2>

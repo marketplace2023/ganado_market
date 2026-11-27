@@ -40,16 +40,16 @@ export function FincaPage() {
 
   return (
     <div>
-      <div className="relative h-44 bg-gradient-to-br from-primary to-emerald-900 sm:h-56">
-        {f.coverUrl && <img src={f.coverUrl} alt="" className="size-full object-cover opacity-70" />}
+      <div className="brand-surface relative h-44 sm:h-64">
+        {f.coverUrl && <img src={f.coverUrl} alt="" className="size-full object-cover opacity-80" />}
       </div>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="-mt-12 flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm sm:flex-row sm:items-center">
+        <div className="-mt-12 flex flex-col gap-4 rounded-2xl border bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
           <span className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border-4 border-card bg-secondary text-3xl font-semibold text-secondary-foreground">
             {f.logoUrl ? <img src={f.logoUrl} alt="" className="size-full object-cover" /> : f.name[0]}
           </span>
           <div className="flex-1">
-            <h1 className="flex items-center gap-2 text-2xl font-semibold">
+            <h1 className="flex items-center gap-2 font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
               {f.name}
               {f.verificada && <BadgeCheck className="size-5 text-sky-600" aria-label="Verificada" />}
             </h1>
@@ -74,7 +74,7 @@ export function FincaPage() {
           <MapaUbicacion punto={puntoFinca(f)} />
         </div>
 
-        <h2 className="mt-10 mb-5 text-xl font-semibold">
+        <h2 className="mt-10 mb-5 border-b pb-3 font-heading text-3xl font-semibold">
           Ganado publicado <span className="text-muted-foreground">({f.anunciosCount})</span>
         </h2>
         {anuncios.data?.items.length ? (

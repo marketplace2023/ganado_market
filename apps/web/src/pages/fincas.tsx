@@ -17,6 +17,7 @@ import {
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { BadgeCheck, MapPin, Search, SearchX } from "lucide-react"
 import { Link, useSearchParams } from "react-router"
+import { DirectoryHeading } from "@/components/directory-heading"
 import {
   PaginacionResultados,
   ResultadosMapa,
@@ -49,17 +50,11 @@ export function FincasPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight">
-        Fincas {estado ? `en ${estadoName(estado)}` : "en Venezuela"}
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {data
-          ? `${formatNumber(data.total)} ${data.total === 1 ? "finca" : "fincas"}`
-          : query.isLoading
-            ? "Buscando…"
-            : null}
-      </p>
-      <div className="my-5 flex flex-wrap gap-3">
+      <DirectoryHeading
+        title={estado ? `Fincas en ${estadoName(estado)}` : "Fincas en Venezuela"}
+        count={data ? `${formatNumber(data.total)} ${data.total === 1 ? "finca" : "fincas"}` : query.isLoading ? "Buscando…" : undefined}
+      />
+      <div className="mb-5 flex flex-wrap gap-3 rounded-xl border bg-card p-3">
         <form
           role="search"
           className="flex w-full max-w-md gap-2"
@@ -150,7 +145,7 @@ function TarjetaFinca({
   onUbicar?: () => void
 }) {
   return (
-    <article className="flex items-start gap-3 rounded-xl border bg-card p-4">
+    <article className="brand-lift flex items-start gap-3 rounded-2xl border bg-card p-4 hover:border-primary/40">
       <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-secondary text-lg font-semibold text-secondary-foreground">
         {finca.logoUrl ? (
           <img
@@ -166,7 +161,7 @@ function TarjetaFinca({
       <div className="min-w-0">
         <Link
           to={`/fincas/${finca.slug}`}
-          className="inline-flex items-center gap-1.5 font-semibold hover:underline"
+          className="inline-flex items-center gap-1.5 font-heading text-lg font-semibold hover:underline"
         >
           {finca.name}
           {finca.verificada && (

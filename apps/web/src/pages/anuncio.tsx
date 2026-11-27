@@ -106,7 +106,7 @@ export function AnuncioPage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <div className="min-w-0">
           {/* Galería */}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border bg-muted">
             {a.media.length ? (
               <img src={a.media[foto]?.url} alt={a.title} className="size-full object-cover" />
             ) : (
@@ -195,9 +195,9 @@ export function AnuncioPage() {
 
         {/* Columna lateral */}
         <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <div className="rounded-xl border bg-card p-5">
+          <div className="rounded-2xl border border-t-4 border-t-primary bg-card p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
-              <h1 className="text-xl leading-snug font-semibold">{a.title}</h1>
+              <h1 className="font-heading text-3xl leading-tight font-semibold tracking-tight">{a.title}</h1>
               <button
                 onClick={() => toggle(a.id)}
                 aria-label="Favorito"
@@ -264,7 +264,7 @@ export function AnuncioPage() {
 
       {a.related.length > 0 && (
         <section className="mt-14">
-          <h2 className="mb-5 text-2xl font-semibold tracking-tight">También te puede interesar</h2>
+          <h2 className="mb-5 border-b pb-3 font-heading text-3xl font-semibold tracking-tight">También te puede interesar</h2>
           <AnuncioGrid items={a.related} />
         </section>
       )}

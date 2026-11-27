@@ -40,7 +40,7 @@ export function AdminLayout() {
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />
 
   const nav: NavGroup[] = [
-    { label: "General", items: [{ title: "Dashboard", href: "/", icon: LayoutDashboard }] },
+    { label: "General", items: [{ title: "Resumen", href: "/", icon: LayoutDashboard }] },
     {
       label: "Moderación",
       items: [
@@ -73,8 +73,8 @@ export function AdminLayout() {
       subtitle="Administración"
       nav={nav}
       currentPath={location.pathname}
-      renderLink={({ href, className, children, onClick }) => (
-        <Link to={href} className={className} onClick={onClick}>
+      renderLink={({ href, className, children, onClick, current }) => (
+        <Link to={href} className={className} onClick={onClick} aria-current={current}>
           {children}
         </Link>
       )}
@@ -85,7 +85,7 @@ export function AdminLayout() {
       }}
       headerRight={
         <a href={WEB_URL} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-          Ver marketplace <ExternalLink />
+          <span>Marketplace</span> <ExternalLink />
         </a>
       }
     >

@@ -29,7 +29,7 @@ export function Logo({
       <span className="flex flex-col leading-none">
         <span
           className={cn(
-            "text-[1.05rem] font-bold tracking-tight",
+            "text-[1.14rem] font-bold tracking-[-.045em]",
             inverted ? "text-sidebar-foreground" : "text-foreground"
           )}
         >
@@ -38,8 +38,8 @@ export function Logo({
         {subtitle && (
           <span
             className={cn(
-              "mt-1 text-[10px] font-medium tracking-[0.14em] uppercase",
-              inverted ? "text-sidebar-foreground/50" : "text-muted-foreground"
+              "mt-1 text-[10px] font-semibold tracking-wide",
+              inverted ? "text-sidebar-foreground/80" : "text-muted-foreground"
             )}
           >
             {subtitle}

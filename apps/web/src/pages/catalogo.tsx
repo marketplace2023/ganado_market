@@ -23,6 +23,7 @@ import { SearchX, SlidersHorizontal, X } from "lucide-react"
 import { useState } from "react"
 import { useSearchParams } from "react-router"
 import { AnuncioCard as TarjetaAnuncio, AnuncioGridSkeleton } from "@/components/anuncio-card"
+import { DirectoryHeading } from "@/components/directory-heading"
 import { PaginacionResultados, ResultadosMapa } from "@/components/resultados-mapa"
 import { api, useEspecies } from "@/lib/api"
 import { puntoAnuncio } from "@/lib/ubicaciones"
@@ -157,25 +158,19 @@ export function CatalogoPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">{titulo}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {query.data ? `${formatNumber(query.data.total)} anuncios` : "Buscando…"}
-          </p>
-        </div>
+      <DirectoryHeading title={titulo} count={query.data ? `${formatNumber(query.data.total)} anuncios` : query.isLoading ? "Buscando…" : undefined}>
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="lg:hidden" onClick={() => setShowFilters((s) => !s)}>
+          <Button variant="outline" className="lg:hidden" aria-expanded={showFilters} aria-controls="filtros-ganado" onClick={() => setShowFilters((s) => !s)}>
             <SlidersHorizontal /> Filtros {activos.length > 0 && `(${activos.length})`}
           </Button>
-          <NativeSelect value={orden} onChange={(e) => set("orden", e.target.value)} aria-label="Ordenar">
+          <NativeSelect className="rounded-lg bg-card" value={orden} onChange={(e) => set("orden", e.target.value)} aria-label="Ordenar">
             <NativeSelectOption value="destacados">Destacados primero</NativeSelectOption>
             <NativeSelectOption value="recientes">Más recientes</NativeSelectOption>
             <NativeSelectOption value="precio_asc">Menor precio</NativeSelectOption>
             <NativeSelectOption value="precio_desc">Mayor precio</NativeSelectOption>
           </NativeSelect>
         </div>
-      </div>
+      </DirectoryHeading>
 
       {activos.length > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
@@ -192,8 +187,11 @@ export function CatalogoPage() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className={cn("lg:block", showFilters ? "block" : "hidden")}>
-          <div className="rounded-xl border bg-card p-4 lg:sticky lg:top-20">{filtros}</div>
+        <aside id="filtros-ganado" aria-label="Filtros del catálogo" className={cn("lg:block", showFilters ? "block" : "hidden")}>
+          <div className="rounded-2xl border bg-card p-4 lg:sticky lg:top-20">
+            <h2 className="mb-4 flex items-center gap-2 border-b pb-3 font-semibold"><SlidersHorizontal className="size-4 text-primary" /> Filtrar ganado</h2>
+            {filtros}
+          </div>
         </aside>
         <div>
           {query.isLoading ? (

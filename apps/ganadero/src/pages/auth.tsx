@@ -31,7 +31,8 @@ export function LoginPage() {
       image={{ src: loginImage, position: "center 37%" }}
     >
       <LoginForm
-        description="Ingresa a tu panel de ganadero."
+        title="Ingresa a tu panel"
+        description="Accede a tus fincas, anuncios y consultas."
         onSubmit={async (dto) => {
           await login(dto)
           navigate(from, { replace: true })

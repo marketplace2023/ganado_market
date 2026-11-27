@@ -22,18 +22,21 @@ export function SiteLayout() {
 
   const navLink = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-      isActive ? "text-primary" : "text-foreground/70 hover:text-foreground"
+      "rounded-lg px-3 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+      isActive ? "bg-secondary text-primary" : "text-foreground/75 hover:bg-secondary/60 hover:text-foreground"
     )
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <Link to="/" aria-label="Inicio">
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-card focus:p-3">
+        Saltar al contenido
+      </a>
+      <header className="sticky top-0 z-30 border-b border-t-[3px] border-t-[#315d43] bg-card/95 backdrop-blur">
+        <div className="mx-auto flex min-h-[4.1rem] max-w-7xl items-center gap-3 px-4 sm:px-6">
+          <Link to="/" aria-label="Inicio" className="shrink-0 rounded-md focus-visible:ring-2 focus-visible:ring-ring">
             <Logo />
           </Link>
-          <nav className="ml-4 hidden items-center gap-1 lg:flex">
+          <nav aria-label="Navegación principal" className="ml-3 hidden items-center lg:flex">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} className={navLink}>
                 {n.label}
@@ -67,7 +70,7 @@ export function SiteLayout() {
                 <User /> Ingresar
               </Link>
             )}
-            <a href={`${GANADERO_URL}/registro`} className={buttonVariants({ size: "lg" })}>
+            <a href={`${GANADERO_URL}/registro`} className={cn(buttonVariants({ size: "lg" }), "h-10 px-3.5")}>
               <Plus /> Vender ganado
             </a>
           </div>
@@ -76,13 +79,14 @@ export function SiteLayout() {
             className="ml-auto rounded-md p-2 lg:hidden"
             onClick={() => setOpen((o) => !o)}
             aria-label="Menú"
+            aria-expanded={open}
           >
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
         {open && (
           <div className="border-t px-4 py-3 lg:hidden" onClick={() => setOpen(false)}>
-            <nav className="flex flex-col">
+            <nav aria-label="Navegación principal" className="flex flex-col">
               {NAV.map((n) => (
                 <NavLink key={n.to} to={n.to} className={navLink}>
                   {n.label}
@@ -116,7 +120,7 @@ export function SiteLayout() {
         )}
       </header>
 
-      <main className="flex-1">
+      <main id="contenido" tabIndex={-1} className="flex-1">
         <Outlet />
       </main>
 
@@ -129,7 +133,7 @@ function SiteFooter() {
   const { data: settings } = useSettings()
   const soporte = settings?.whatsappSoporte ? whatsappUrl(settings.whatsappSoporte) : null
   return (
-    <footer className="mt-16 border-t bg-secondary/50">
+    <footer className="mt-16 border-t-4 border-t-[#9cae8e] bg-[#e9eee2]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-1">
           <Logo />

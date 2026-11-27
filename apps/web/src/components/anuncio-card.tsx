@@ -22,8 +22,8 @@ export function AnuncioCard({ anuncio, onUbicar }: { anuncio: AnuncioCardData; o
   ].filter(Boolean)
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-xl border bg-card transition hover:shadow-md">
-      <Link to={`/ganado/${anuncio.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-muted">
+    <article className="brand-lift group relative flex flex-col overflow-hidden rounded-2xl border bg-card hover:border-primary/35 hover:shadow-[0_14px_30px_-22px_#1f432f90]">
+      <Link to={`/ganado/${anuncio.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
         {anuncio.thumbnailUrl ? (
           <img
             src={anuncio.thumbnailUrl}
@@ -56,20 +56,20 @@ export function AnuncioCard({ anuncio, onUbicar }: { anuncio: AnuncioCardData; o
         type="button"
         onClick={() => toggle(anuncio.id)}
         aria-label={fav ? "Quitar de favoritos" : "Guardar en favoritos"}
-        className="absolute top-2 right-2 rounded-full bg-background/90 p-1.5 shadow-sm transition hover:scale-110"
+        className="absolute top-2 right-2 grid size-9 place-items-center rounded-full bg-background/95 shadow-sm transition hover:bg-card focus-visible:ring-2 focus-visible:ring-ring"
       >
         <Heart className={cn("size-4", fav ? "fill-red-500 text-red-500" : "text-foreground/60")} />
       </button>
 
-      <div className="flex flex-1 flex-col p-3.5">
-        <p className="text-xs font-medium text-primary">{anuncio.especieName}</p>
-        <Link to={`/ganado/${anuncio.slug}`} className="mt-0.5 line-clamp-2 font-semibold leading-snug hover:underline">
+      <div className="flex flex-1 flex-col p-4">
+        <p className="mb-1 text-xs font-semibold text-primary">{anuncio.especieName}</p>
+        <Link to={`/ganado/${anuncio.slug}`} className="line-clamp-2 font-heading text-lg leading-snug font-semibold hover:underline">
           {anuncio.title}
         </Link>
         {detalle.length > 0 && (
           <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{detalle.join(" · ")}</p>
         )}
-        <div className="mt-3">
+        <div className="mt-3 border-t pt-3">
           <Precio usd={anuncio.precioUsd} modalidad={anuncio.modalidadPrecio} size="sm" />
         </div>
         {anuncio.fincaName && (
@@ -98,9 +98,9 @@ export function AnuncioCard({ anuncio, onUbicar }: { anuncio: AnuncioCardData; o
           <button
             type="button"
             onClick={onUbicar}
-            className="mt-2 w-fit text-left text-xs font-semibold text-primary hover:underline"
+            className="mt-2 inline-flex min-h-8 w-fit items-center gap-1.5 rounded-md bg-secondary px-2.5 text-left text-xs font-semibold text-primary hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Ver en mapa
+            <MapPin className="size-3.5" /> Ver en mapa
           </button>
         )}
       </div>

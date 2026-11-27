@@ -19,7 +19,8 @@ export function LoginPage() {
   return (
     <AuthLayout subtitle="Administración" headline={HEADLINE} description={DESCRIPTION} image={{ src: loginImage }}>
       <LoginForm
-        description="Acceso exclusivo para administradores."
+        title="Ingresa a Administración"
+        description="Usa las credenciales de tu cuenta de administrador."
         forgotLink={<Link to="/recuperar" className={linkCls}>¿Olvidaste tu contraseña?</Link>}
         onSubmit={async (dto) => {
           await login(dto)

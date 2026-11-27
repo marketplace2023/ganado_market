@@ -54,7 +54,7 @@ flowchart LR
     API --> Images["Cloudinary o disco local"]
 ```
 
-- **Frontend.** React 19, React Router 7, TanStack Query 5, Vite 8 y TypeScript 6. Tailwind CSS 4, shadcn con Base UI y Lucide para la interfaz. La portada utiliza Border Beam de Magic UI con Motion y Spotlight de Aceternity UI. La marca y las imágenes de autenticación son recursos incluidos en la compilación.
+- **Frontend.** React 19, React Router 7, TanStack Query 5, Vite 8 y TypeScript 6. Tailwind CSS 4, shadcn con Base UI y Lucide para la interfaz. `packages/ui` comparte Grid Pattern, Number Ticker y Border Beam de [Magic UI](https://magicui.design/docs) y una adaptación de [Background Gradient de Aceternity UI](https://ui.aceternity.com/components/background-gradient). Los tokens de color se activan mediante `data-ecosistema` y distinguen el marketplace, el panel ganadero y administración. Geist se usa para la interfaz y Fraunces para los titulares de la web y del panel ganadero. La marca y las imágenes de autenticación se incluyen en la compilación.
 - **Backend.** Hono 4 sobre Node.js, con `@hono/node-server`. Drizzle ORM y `pg` para consultar PostgreSQL. Drizzle Kit genera y aplica migraciones, y tsup compila el API.
 - **Validación y sesión.** Zod 4 en el API y en formularios, bcryptjs para contraseñas, JWT HS256 y Nodemailer para recuperación.
 - **Monorepo.** npm workspaces y Turborepo orquestan desarrollo, compilación y validación. El proyecto declara Node.js 20.19 o superior y npm 11.16.0.

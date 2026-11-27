@@ -62,8 +62,8 @@ export function PanelLayout() {
       subtitle="Panel del ganadero"
       nav={nav}
       currentPath={location.pathname}
-      renderLink={({ href, className, children, onClick }) => (
-        <Link to={href} className={className} onClick={onClick}>
+      renderLink={({ href, className, children, onClick, current }) => (
+        <Link to={href} className={className} onClick={onClick} aria-current={current}>
           {children}
         </Link>
       )}
@@ -79,8 +79,9 @@ export function PanelLayout() {
             target="_blank"
             rel="noreferrer"
             className={buttonVariants({ variant: "ghost", size: "sm" })}
+            aria-label="Ver marketplace"
           >
-            Ver marketplace <ExternalLink />
+            <span className="hidden sm:inline">Marketplace</span> <ExternalLink />
           </a>
           <Link to="/anuncios/nuevo" className={buttonVariants({ size: "sm" })}>
             <Plus /> Publicar
