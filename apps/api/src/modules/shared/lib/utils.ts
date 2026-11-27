@@ -18,3 +18,5 @@ export function paramId(raw: string) {
 export function pagination(page: number, limit: number) {
   return { limit, offset: (page - 1) * limit }
 }
+
+export const escapeLike = (value: string) => value.replace(/[\\%_]/g, (character) => `\\${character}`)

@@ -34,6 +34,8 @@ import { Link, useParams } from "react-router"
 import { toast } from "sonner"
 import { AnimalPlaceholder } from "@/components/animal-placeholder"
 import { AnuncioGrid } from "@/components/anuncio-card"
+import { MapaUbicacion } from "@/components/resultados-mapa"
+import { puntoAnuncio } from "@/lib/ubicaciones"
 import { NotFoundPage } from "@/pages/not-found"
 import { Precio } from "@/components/precio"
 import { DenunciarAnuncio } from "@/components/denunciar"
@@ -255,6 +257,7 @@ export function AnuncioPage() {
           </Link>
 
           {disponible && <ConsultaForm anuncioId={a.id} />}
+          <MapaUbicacion punto={puntoAnuncio(a)} />
           <CompraSegura anuncioId={a.id} />
         </aside>
       </div>

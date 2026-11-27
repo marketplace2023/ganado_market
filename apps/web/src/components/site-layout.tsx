@@ -9,6 +9,7 @@ import { GANADERO_URL, useAuth, useSettings } from "@/lib/api"
 
 const NAV = [
   { to: "/ganado", label: "Comprar ganado" },
+  { to: "/fincas", label: "Fincas" },
   { to: "/subastas", label: "Remates" },
   { to: "/solicitudes", label: "Solicitudes" },
   { to: "/servicios", label: "Servicios" },
@@ -153,6 +154,7 @@ function SiteFooter() {
           <p className="mb-3 text-sm font-semibold">Marketplace</p>
           <ul className="space-y-1.5 text-sm text-muted-foreground">
             <li><Link className="hover:text-foreground" to="/ganado">Comprar ganado</Link></li>
+            <li><Link className="hover:text-foreground" to="/fincas">Fincas</Link></li>
             <li><Link className="hover:text-foreground" to="/subastas">Remates virtuales</Link></li>
             <li><Link className="hover:text-foreground" to="/solicitudes">Solicitudes de compra</Link></li>
             <li><Link className="hover:text-foreground" to="/servicios">Transporte y veterinarios</Link></li>

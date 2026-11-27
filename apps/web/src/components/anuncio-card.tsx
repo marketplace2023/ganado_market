@@ -12,7 +12,7 @@ import { useFavoritos } from "@/lib/favoritos"
 import { AnimalPlaceholder } from "./animal-placeholder"
 import { Precio } from "./precio"
 
-export function AnuncioCard({ anuncio }: { anuncio: AnuncioCardData }) {
+export function AnuncioCard({ anuncio, onUbicar }: { anuncio: AnuncioCardData; onUbicar?: () => void }) {
   const { isFavorito, toggle } = useFavoritos()
   const fav = isFavorito(anuncio.id)
   const detalle = [
@@ -94,6 +94,15 @@ export function AnuncioCard({ anuncio }: { anuncio: AnuncioCardData }) {
             </span>
           )}
         </div>
+        {onUbicar && (
+          <button
+            type="button"
+            onClick={onUbicar}
+            className="mt-2 w-fit text-left text-xs font-semibold text-primary hover:underline"
+          >
+            Ver en mapa
+          </button>
+        )}
       </div>
     </article>
   )

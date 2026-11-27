@@ -43,6 +43,8 @@ export type PublicSettings = {
   emailSoporte: string
 }
 
+export type Coordenadas = { latitud: number; longitud: number }
+
 export type AnuncioCard = {
   id: number
   slug: string
@@ -57,6 +59,7 @@ export type AnuncioCard = {
   negociable: boolean
   estado: string
   municipio: string
+  ubicacionPublica: Coordenadas | null
   isFeatured: boolean
   guiaMovilizacion: boolean
   especieName: string | null
@@ -76,6 +79,7 @@ export type FincaPublic = {
   slug: string
   estado: string
   municipio: string
+  ubicacionPublica: Coordenadas | null
   descripcion: string | null
   hectareas: number | null
   hierro: string | null
@@ -85,6 +89,11 @@ export type FincaPublic = {
   verificada: boolean
   createdAt: string
 }
+
+export type FincaEnDirectorio = Pick<
+  FincaPublic,
+  "id" | "name" | "slug" | "estado" | "municipio" | "ubicacionPublica" | "logoUrl" | "verificada"
+> & { anunciosCount: number }
 
 export type AnuncioDetail = AnuncioCard & {
   status: AnuncioStatus

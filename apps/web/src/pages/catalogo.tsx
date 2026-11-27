@@ -19,11 +19,13 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { NativeSelect, NativeSelectOption } from "@workspace/ui/components/native-select"
 import { cn } from "cn"
-import { ChevronLeft, ChevronRight, SearchX, SlidersHorizontal, X } from "lucide-react"
+import { SearchX, SlidersHorizontal, X } from "lucide-react"
 import { useState } from "react"
 import { useSearchParams } from "react-router"
-import { AnuncioGrid, AnuncioGridSkeleton } from "@/components/anuncio-card"
+import { AnuncioCard as TarjetaAnuncio, AnuncioGridSkeleton } from "@/components/anuncio-card"
+import { PaginacionResultados, ResultadosMapa } from "@/components/resultados-mapa"
 import { api, useEspecies } from "@/lib/api"
+import { puntoAnuncio } from "@/lib/ubicaciones"
 
 const FILTER_KEYS = [
   "q",
@@ -51,12 +53,13 @@ export function CatalogoPage() {
     string
   >
   const orden = params.get("orden") ?? "destacados"
-  const page = Number(params.get("page") ?? 1)
+  const pagina = Number(params.get("page") ?? 1)
+  const page = Number.isSafeInteger(pagina) && pagina > 0 ? pagina : 1
+  const queryString = toQuery({ ...filters, orden, page, limit: 24 })
 
   const query = useQuery({
-    queryKey: ["anuncios", params.toString()],
-    queryFn: () =>
-      api.get<Paginated<AnuncioCard>>(`/anuncios${toQuery({ ...filters, orden, page, limit: 24 })}`),
+    queryKey: ["anuncios", queryString],
+    queryFn: () => api.get<Paginated<AnuncioCard>>(`/anuncios${queryString}`),
     placeholderData: keepPreviousData,
   })
 
@@ -145,7 +148,7 @@ export function CatalogoPage() {
       {rango("Peso promedio (kg)", "minPeso", "maxPeso")}
       {rango("Edad (meses)", "minEdad", "maxEdad")}
       {activos.length > 0 && (
-        <Button variant="outline" className="w-full" onClick={() => setParams(new URLSearchParams())}>
+        <Button variant="outline" className="w-full" onClick={() => setParams(params.get("vista") === "mapa" ? { vista: "mapa" } : {})}>
           Limpiar filtros
         </Button>
       )}
@@ -188,31 +191,25 @@ export function CatalogoPage() {
         </div>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[240px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
         <aside className={cn("lg:block", showFilters ? "block" : "hidden")}>
           <div className="rounded-xl border bg-card p-4 lg:sticky lg:top-20">{filtros}</div>
         </aside>
         <div>
           {query.isLoading ? (
             <AnuncioGridSkeleton />
+          ) : query.isError ? (
+            <EmptyState icon={SearchX} title="No pudimos cargar los anuncios" action={<Button onClick={() => query.refetch()}>Reintentar</Button>} />
           ) : query.data?.items.length ? (
             <>
               <div className={cn(query.isFetching && "opacity-60 transition-opacity")}>
-                <AnuncioGrid items={query.data.items} />
+                <ResultadosMapa
+                  items={query.data.items}
+                  ubicar={puntoAnuncio}
+                  renderResultado={(anuncio, acciones) => <TarjetaAnuncio anuncio={anuncio} onUbicar={acciones?.seleccionar} />}
+                />
               </div>
-              {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-center gap-3">
-                  <Button variant="outline" disabled={page <= 1} onClick={() => set("page", String(page - 1))}>
-                    <ChevronLeft /> Anterior
-                  </Button>
-                  <span className="text-sm text-muted-foreground">
-                    Página {page} de {totalPages}
-                  </span>
-                  <Button variant="outline" disabled={page >= totalPages} onClick={() => set("page", String(page + 1))}>
-                    Siguiente <ChevronRight />
-                  </Button>
-                </div>
-              )}
+              <PaginacionResultados page={page} totalPages={totalPages} onChange={(nueva) => set("page", String(nueva))} />
             </>
           ) : (
             <EmptyState

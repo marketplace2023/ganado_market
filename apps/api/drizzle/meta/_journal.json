@@ -36,6 +36,13 @@
       "when": 1795793324585,
       "tag": "0004_odoo_table_names",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795794412587,
+      "tag": "0005_ubicacion_publica_fincas",
+      "breakpoints": true
     }
   ]
 }

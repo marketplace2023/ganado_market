@@ -13,6 +13,7 @@ import { LoginPage, RecuperarPage, RegistroPage, RestablecerPage } from "@/pages
 import { CatalogoPage } from "@/pages/catalogo"
 import { FavoritosPage } from "@/pages/favoritos"
 import { FincaPage } from "@/pages/finca"
+import { FincasPage } from "@/pages/fincas"
 import { HomePage } from "@/pages/home"
 import { ContactoPage, PrivacidadPage, TerminosPage } from "@/pages/legal"
 import { NotFoundPage } from "@/pages/not-found"
@@ -49,6 +50,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="ganado" element={<CatalogoPage />} />
               <Route path="ganado/:slug" element={<AnuncioPage />} />
               <Route path="fincas/:slug" element={<FincaPage />} />
+              <Route path="fincas" element={<FincasPage />} />
               <Route path="subastas" element={<SubastasPage />} />
               <Route path="subastas/:slug" element={<SubastaPage />} />
               <Route path="servicios" element={<ServiciosPage />} />

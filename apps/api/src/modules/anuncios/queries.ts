@@ -8,6 +8,7 @@ import {
   razasTable,
   usersTable,
 } from "#database/schemas/index.ts"
+import type { Coordenadas } from "@workspace/shared"
 import { and, asc, desc, eq, ne, sql, type SQL } from "drizzle-orm"
 import { anuncioDisponible, anuncioReservado } from "./reservas.ts"
 
@@ -26,6 +27,11 @@ export const anuncioCardColumns = {
   negociable: anunciosTable.negociable,
   estado: anunciosTable.estado,
   municipio: anunciosTable.municipio,
+  ubicacionPublica: sql<Coordenadas | null>`case
+    when ${anunciosTable.estado} = ${fincasTable.estado}
+      and lower(trim(${anunciosTable.municipio})) = lower(trim(${fincasTable.municipio}))
+    then ${fincasTable.ubicacionPublica}
+  end`,
   isFeatured: anunciosTable.isFeatured,
   guiaMovilizacion: anunciosTable.guiaMovilizacion,
   especieName: especiesTable.name,
@@ -107,6 +113,7 @@ export async function getAnuncioDetail(where: SQL) {
         slug: fincasTable.slug,
         estado: fincasTable.estado,
         municipio: fincasTable.municipio,
+        ubicacionPublica: fincasTable.ubicacionPublica,
         descripcion: fincasTable.descripcion,
         hectareas: fincasTable.hectareas,
         hierro: fincasTable.hierro,

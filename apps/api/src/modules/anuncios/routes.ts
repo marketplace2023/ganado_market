@@ -18,7 +18,7 @@ import {
 } from "#modules/shared/http/auth.ts"
 import { badRequest, conflict, notFound } from "#modules/shared/http/errors.ts"
 import { validate } from "#modules/shared/http/validator.ts"
-import { pagination, paramId } from "#modules/shared/lib/utils.ts"
+import { escapeLike, pagination, paramId } from "#modules/shared/lib/utils.ts"
 import {
   ANUNCIO_STATUS,
   anuncioDto,
@@ -49,7 +49,6 @@ import {
   ultimaReservaAnuncio,
 } from "./reservas.ts"
 
-const escapeLike = (s: string) => s.replace(/[\\%_]/g, (m) => `\\${m}`)
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Público

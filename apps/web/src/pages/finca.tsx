@@ -16,7 +16,9 @@ import { cn } from "cn"
 import { BadgeCheck, Fence, MapPin, MessageCircle, PackageOpen, Tag } from "lucide-react"
 import { useParams } from "react-router"
 import { AnuncioGrid } from "@/components/anuncio-card"
+import { MapaUbicacion } from "@/components/resultados-mapa"
 import { api } from "@/lib/api"
+import { puntoFinca } from "@/lib/ubicaciones"
 import { NotFoundPage } from "./not-found"
 
 export function FincaPage() {
@@ -68,6 +70,9 @@ export function FincaPage() {
           <p className="mt-2 text-xs text-muted-foreground">Portada ilustrativa de demostración</p>
         )}
         {f.descripcion && <p className="mt-6 max-w-3xl text-sm leading-relaxed text-foreground/85">{f.descripcion}</p>}
+        <div className="mt-6">
+          <MapaUbicacion punto={puntoFinca(f)} />
+        </div>
 
         <h2 className="mt-10 mb-5 text-xl font-semibold">
           Ganado publicado <span className="text-muted-foreground">({f.anunciosCount})</span>

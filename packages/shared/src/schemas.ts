@@ -95,6 +95,10 @@ export const fincaDto = z.object({
   estado: estadoSlug,
   municipio: z.string().trim().min(2).max(120),
   direccion: optionalText(255),
+  ubicacionPublica: z.object({
+    latitud: z.number().min(-85.0511).max(85.0511),
+    longitud: z.number().min(-180).max(180),
+  }).nullish(),
   hectareas: z.coerce.number().positive().max(1_000_000).optional(),
   descripcion: optionalText(3000),
   whatsapp: telefono,

@@ -1,5 +1,5 @@
-import type { FincaVerificacion } from "@workspace/shared"
-import { foreignKey, index, integer, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core"
+import type { Coordenadas, FincaVerificacion } from "@workspace/shared"
+import { foreignKey, index, integer, jsonb, numeric, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core"
 import { usersTable } from "./users.ts"
 
 /** Finca / hato: el "perfil de vendedor" del ganadero. Un ganadero puede tener varias. */
@@ -13,6 +13,7 @@ export const fincasTable = pgTable(
     estado: varchar("estado", { length: 40 }).notNull(),
     municipio: varchar("municipio", { length: 120 }).notNull(),
     direccion: varchar("direccion", { length: 255 }),
+    ubicacionPublica: jsonb("ubicacion_publica").$type<Coordenadas>(),
     hectareas: numeric("hectareas", { precision: 12, scale: 2, mode: "number" }),
     descripcion: text("descripcion"),
     whatsapp: varchar("whatsapp", { length: 20 }).notNull(),

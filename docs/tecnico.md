@@ -73,6 +73,10 @@ Fuente: [middleware de acceso](../apps/api/src/modules/shared/http/auth.ts) y [r
 
 ### Fincas, anuncios y reservas
 
+El catálogo de ganado (`/ganado`) y el directorio de fincas (`/fincas`) muestran los resultados de la página actual en una lista y un mapa sincronizados. En pantallas pequeñas se alterna con `vista=mapa` en la URL. Cada ficha también tiene su mapa. Cuando el ganadero publica un punto, la finca usa esas coordenadas y el anuncio las hereda si coincide su estado y municipio. Para los demás resultados se usan los centros administrativos del municipio o del estado. La dirección privada permanece en el panel.
+
+El cliente carga Leaflet y React Leaflet bajo demanda. Los mosaicos predeterminados son de [OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/) y se pueden configurar en la compilación de la web con `VITE_MAP_TILE_URL` y `VITE_MAP_TILE_ATTRIBUTION`. El archivo [ubicaciones-venezuela.json](../apps/web/src/lib/ubicaciones-venezuela.json) contiene coordenadas administrativas redondeadas y nombres normalizados de la [exportación VE de GeoNames](https://www.geonames.org/export/) bajo CC BY 4.0. El navegador resuelve los centros a partir del archivo local de datos.
+
 - El ganadero crea una finca propia y vincula el anuncio a ella. La raza, cuando se informa, debe corresponder a la especie. El catálogo incluye ejemplares, lotes y genética. La ficha recoge cantidad, clase, sexo, peso, edad, ubicación y declaraciones sanitarias. Cada anuncio admite hasta 10 fotos y un enlace de video.
 - Una finca inicia en `pendiente`. Administración puede marcarla `verificada` o `rechazada`. Un cambio de nombre, RIF o hierro de una finca verificada vuelve a ponerla en revisión. La verificación se registra como decisión administrativa.
 - Un anuncio se crea como `borrador` o `pendiente`. El ganadero puede enviar un borrador o un rechazado a revisión. Administración puede aprobarlo, rechazarlo con motivo o alternar el destacado. Un publicado puede pausarse, y el pausado se puede reactivar. El ganadero puede marcar un publicado o pausado como `vendido`. Editar un anuncio puede devolverlo a revisión. Los vendidos conservan ese estado.
@@ -123,7 +127,7 @@ El último snapshot de Drizzle define **21 tablas de aplicación**. Las claves d
 | `livestock_species` | `especies` | Especie, nombre, slug, icono y orden. | PK `id`, `slug` único. |
 | `livestock_breed` | `razas` | Raza y propósito productivo. | PK `id`, `slug` único; FK `especie_id` a `livestock_species`. |
 | `ir_config_parameter` | `settings` | Valores de tasa, modo y datos de soporte. | PK `key`; columnas `value` y `updated_at`. |
-| `livestock_farm` | `fincas` | Identidad, ubicación, superficie, medios y verificación. | PK `id`; FK `owner_id` a `res_users`; `slug` único. |
+| `livestock_farm` | `fincas` | Identidad, ubicación, superficie, medios y verificación. `ubicacion_publica` es un JSONB opcional con `latitud` y `longitud`. | PK `id`; FK `owner_id` a `res_users`; `slug` único. |
 | `livestock_listing` | `anuncios` | Oferta, inventario, precio en USD, estado, datos sanitarios y contadores. | PK `id`; FK a `res_users`, `livestock_farm`, `livestock_species` y opcionalmente `livestock_breed`; `slug` único. |
 | `product_image` | `anuncio_media` | URL y posición de cada imagen. | PK `id`; FK `anuncio_id` a `livestock_listing`. |
 | `livestock_listing_reservation` | `reservas_anuncio` | Cantidad, precio acordado, modalidad, vigencia y resultado. | PK `id`; FK `anuncio_id` a `livestock_listing`; único `(anuncio_id, solicitud_id)`; límite de una fila abierta por anuncio mediante índice parcial. |
@@ -187,7 +191,7 @@ erDiagram
 
 Estas equivalencias son nominales. Las tablas siguen perteneciendo a GanadoMarket y conservan sus columnas, restricciones y comportamiento. Una integración con Odoo requeriría adaptar el esquema y definir cómo sincronizar los datos.
 
-Fuentes: [esquemas TypeScript](../apps/api/src/database/schemas), [snapshot de PostgreSQL](../apps/api/drizzle/meta/0004_snapshot.json) y [migraciones](../apps/api/drizzle).
+Fuentes: [esquemas TypeScript](../apps/api/src/database/schemas), [snapshot de PostgreSQL](../apps/api/drizzle/meta/0005_snapshot.json) y [migraciones](../apps/api/drizzle).
 
 ## Referencia HTTP
 
@@ -226,7 +230,8 @@ Fuentes: [esquemas TypeScript](../apps/api/src/database/schemas), [snapshot de P
 | GET | `/anuncios/:slug` | Público | `200` con ficha, finca, galería y relacionados. Incrementa vistas. |
 | POST | `/anuncios/:id/whatsapp` | Público | Registra un clic si el anuncio está disponible; `204`. |
 | POST | `/anuncios/:id/consultas` | Sesión opcional | `consultaDto`; `201` con `{ id }`. |
-| GET | `/fincas/:slug` | Público | `200` con perfil, medios y conteo de anuncios disponibles de la finca. |
+| GET | `/fincas` | Público | `200` paginado. Acepta `q` (nombre, municipio o estado), `estado`, `page` y `limit`. Incluye fincas verificadas o con anuncios publicados y omite las rechazadas. |
+| GET | `/fincas/:slug` | Público | `200` con perfil, medios, punto público opcional y conteo de anuncios disponibles de la finca. |
 | GET | `/subastas` | Público | `filtro=vigentes\|finalizadas`, por defecto `vigentes`; `200` con hasta 50 remates. |
 | GET | `/subastas/:slug` | Público | `200` con detalle, lotes y estado efectivo. |
 | POST | `/subastas/lotes/:loteId/pujas` | Sesión | `{ montoUsd }`; `201` con `{ id, montoUsd, createdAt, endsAt, minimoSiguienteUsd }`. |
@@ -256,7 +261,7 @@ Las rutas requieren sesión y rol ganadero o administrador. Las operaciones sobr
 | GET | `/ganadero/fincas` | `200` con fincas propias. |
 | GET | `/ganadero/fincas/:id` | `200` con detalle de finca propia. |
 | POST | `/ganadero/fincas` | `fincaDto`; `201` con la finca creada. |
-| PUT | `/ganadero/fincas/:id` | `fincaDto`; `200` con la finca actualizada. |
+| PUT | `/ganadero/fincas/:id` | `fincaDto`. Enviar `ubicacionPublica: { latitud, longitud }` para publicar el punto o `null` para retirarlo. Al omitir el campo se conserva el punto existente. Devuelve `200` con la finca actualizada. |
 | GET | `/ganadero/anuncios` | Filtro `status`; `200` con anuncios propios y su última reserva cuando existe. |
 | GET | `/ganadero/anuncios/:id` | `200` con datos de edición y URLs de galería. |
 | POST | `/ganadero/anuncios` | `anuncioDto` más `submit?`; `201` con `{ id, slug, status }`. |
@@ -437,6 +442,7 @@ npm run dev
 | [0002](../apps/api/drizzle/0002_silent_synch.sql) | Denuncias e historial administrativo. |
 | [0003](../apps/api/drizzle/0003_reservas_anuncio.sql) | Reservas privadas y restricciones de unicidad. |
 | [0004](../apps/api/drizzle/0004_odoo_table_names.sql) | Renombra las 21 tablas con `ALTER TABLE … RENAME TO`. Conserva sus registros, columnas, índices y restricciones. Aplicar en coordinación con el despliegue del API que usa los nombres nuevos. |
+| [0005](../apps/api/drizzle/0005_ubicacion_publica_fincas.sql) | Añade `ubicacion_publica` como columna nullable de `livestock_farm`. |
 
 ### Actualización de una base existente
 
@@ -467,7 +473,7 @@ FROM (VALUES
 | `GET /catalogo/especies` y `GET /anuncios` | `200` con datos de la base. Si hay fotos, el catálogo devuelve sus URLs. |
 | `POST /auth/login` y `GET /auth/me` | Inicio de sesión y roles de la cuenta de prueba. |
 | Ficha de anuncio, reserva y detalle de remate | Las relaciones, fotos y reservas existentes se pueden consultar desde el flujo correspondiente. |
-| `npm run db:generate` en el repositorio | El snapshot `0004` coincide con las definiciones de Drizzle. El comando no debe generar otra migración por este cambio. |
+| `npm run db:generate` en el repositorio | El snapshot `0005` coincide con las definiciones de Drizzle. El comando no debe generar otra migración por este cambio. |
 
 ## Límites y diagnóstico
 

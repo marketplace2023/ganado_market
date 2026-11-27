@@ -9,7 +9,7 @@ import {
 } from "@workspace/shared"
 import { Button, buttonVariants } from "@workspace/ui/components/button"
 import { EmptyState, PageHeader } from "@workspace/ui/components/dashboard-shell"
-import { FormField, StatusBadge } from "@workspace/ui/components/form-field"
+import { CheckboxField, FormField, StatusBadge } from "@workspace/ui/components/form-field"
 import { ImageUploader } from "@workspace/ui/components/image-uploader"
 import { Input } from "@workspace/ui/components/input"
 import { NativeSelect, NativeSelectOption } from "@workspace/ui/components/native-select"
@@ -140,6 +140,9 @@ function FincaForm({ id, existing }: { id?: string; existing?: Finca }) {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const [values, setValues] = useState(() => toValues(existing))
+  const [publicarPunto, setPublicarPunto] = useState(Boolean(existing?.ubicacionPublica))
+  const [latitud, setLatitud] = useState(String(existing?.ubicacionPublica?.latitud ?? ""))
+  const [longitud, setLongitud] = useState(String(existing?.ubicacionPublica?.longitud ?? ""))
   const { errors, validate, onServerError, clear } = useSchemaForm(fincaDto)
 
   const save = useMutation({
@@ -147,6 +150,7 @@ function FincaForm({ id, existing }: { id?: string; existing?: Finca }) {
       isNew ? api.post<Finca>("/ganadero/fincas", dto) : api.put<Finca>(`/ganadero/fincas/${id}`, dto),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["fincas"] })
+      qc.invalidateQueries({ queryKey: ["finca", id] })
       toast.success(isNew ? "Finca registrada" : "Cambios guardados")
       navigate("/fincas")
     },
@@ -156,7 +160,13 @@ function FincaForm({ id, existing }: { id?: string; existing?: Finca }) {
   function submit(e: FormEvent) {
     e.preventDefault()
     const clean = Object.fromEntries(Object.entries(values).map(([k, v]) => [k, v === "" ? undefined : v]))
-    const dto = validate(clean)
+    const dto = validate({
+      ...clean,
+      ubicacionPublica: publicarPunto ? {
+        latitud: latitud.trim() ? Number(latitud) : undefined,
+        longitud: longitud.trim() ? Number(longitud) : undefined,
+      } : null,
+    })
     if (dto) save.mutate(dto)
   }
 
@@ -192,6 +202,37 @@ function FincaForm({ id, existing }: { id?: string; existing?: Finca }) {
           <FormField label="Dirección / sector" error={errors.direccion} hint="No se muestra públicamente">
             <Input value={values.direccion} onChange={set("direccion")} />
           </FormField>
+          <fieldset className="space-y-3 rounded-lg border p-4">
+            <legend className="px-1 text-sm font-medium">Ubicación en el mapa</legend>
+            <CheckboxField
+              label="Publicar un punto exacto para mi finca"
+              description="Las coordenadas serán visibles para los compradores. Si desmarcas la casilla, se mostrará una ubicación aproximada."
+              checked={publicarPunto}
+              onChange={setPublicarPunto}
+            />
+            {publicarPunto && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField label="Latitud" required error={errors["ubicacionPublica.latitud"]}>
+                  <Input
+                    type="number" step="any" inputMode="decimal" placeholder="7.8800" value={latitud}
+                    onChange={(e) => {
+                      clear("ubicacionPublica.latitud")
+                      setLatitud(e.target.value)
+                    }}
+                  />
+                </FormField>
+                <FormField label="Longitud" required error={errors["ubicacionPublica.longitud"]}>
+                  <Input
+                    type="number" step="any" inputMode="decimal" placeholder="-67.4700" value={longitud}
+                    onChange={(e) => {
+                      clear("ubicacionPublica.longitud")
+                      setLongitud(e.target.value)
+                    }}
+                  />
+                </FormField>
+              </div>
+            )}
+          </fieldset>
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="WhatsApp de contacto" required error={errors.whatsapp}>
               <Input inputMode="tel" value={values.whatsapp} onChange={set("whatsapp")} placeholder="0414-1234567" />

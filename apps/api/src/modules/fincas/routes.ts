@@ -5,27 +5,46 @@ import { reservaVigenteEn } from "#modules/anuncios/reservas.ts"
 import { authRequired, requireRole, type AppEnv } from "#modules/shared/http/auth.ts"
 import { notFound } from "#modules/shared/http/errors.ts"
 import { validate } from "#modules/shared/http/validator.ts"
-import { paramId, uniqueSlug } from "#modules/shared/lib/utils.ts"
-import { FINCA_VERIFICACION, fincaDto, normalizarTelefono, type FincaDto } from "@workspace/shared"
-import { and, desc, eq, getTableColumns, sql } from "drizzle-orm"
+import { escapeLike, pagination, paramId, uniqueSlug } from "#modules/shared/lib/utils.ts"
+import {
+  ESTADOS_VENEZUELA,
+  FINCA_VERIFICACION,
+  estadoSlug,
+  fincaDto,
+  normalizarTelefono,
+  slugify,
+  type FincaDto,
+} from "@workspace/shared"
+import { and, asc, count, desc, eq, getTableColumns, ilike, inArray, ne, or, sql } from "drizzle-orm"
 import { Hono } from "hono"
 import { z } from "zod"
 
-const publicColumns = {
+const directoryColumns = {
   id: fincasTable.id,
   name: fincasTable.name,
   slug: fincasTable.slug,
   estado: fincasTable.estado,
   municipio: fincasTable.municipio,
+  ubicacionPublica: fincasTable.ubicacionPublica,
+  logoUrl: fincasTable.logoUrl,
+  verificada: sql<boolean>`${fincasTable.verificacion} = 'verificada'`,
+}
+
+const publicColumns = {
+  ...directoryColumns,
   descripcion: fincasTable.descripcion,
   hectareas: fincasTable.hectareas,
   hierro: fincasTable.hierro,
-  logoUrl: fincasTable.logoUrl,
   coverUrl: fincasTable.coverUrl,
   whatsapp: fincasTable.whatsapp,
-  verificada: sql<boolean>`${fincasTable.verificacion} = 'verificada'`,
   createdAt: fincasTable.createdAt,
 }
+
+const anunciosDisponiblesCount = sql<number>`(
+  select count(*)::int from ${anunciosTable} a
+  where a.finca_id = ${fincasTable}."id" and a.status = 'publicado'
+    and not ${reservaVigenteEn(sql`a.id`)}
+)`
 
 const ownedColumns = {
   ...getTableColumns(fincasTable),
@@ -52,15 +71,62 @@ const toColumns = (dto: FincaDto) => ({
 
 export const fincasRoutes = new Hono()
 
+fincasRoutes.get(
+  "/",
+  validate(
+    "query",
+    z.object({
+      q: z.string().trim().max(120).optional(),
+      estado: estadoSlug.optional(),
+      page: z.coerce.number().int().positive().default(1),
+      limit: z.coerce.number().int().min(1).max(48).default(24),
+    })
+  ),
+  async (c) => {
+    const { q, estado, page, limit } = c.req.valid("query")
+    const estadoBuscado = q && slugify(q)
+    const estados = estadoBuscado
+      ? ESTADOS_VENEZUELA.filter((e) => e.slug.includes(estadoBuscado)).map((e) => e.slug)
+      : []
+    const term = q ? `%${escapeLike(q)}%` : undefined
+    const where = and(
+      ne(fincasTable.verificacion, "rechazada"),
+      or(
+        eq(fincasTable.verificacion, "verificada"),
+        sql`exists (
+          select 1 from ${anunciosTable} a
+          where a.finca_id = ${fincasTable}."id" and a.status = 'publicado'
+        )`
+      ),
+      estado ? eq(fincasTable.estado, estado) : undefined,
+      term
+        ? or(
+            ilike(fincasTable.name, term),
+            ilike(fincasTable.municipio, term),
+            estados.length ? inArray(fincasTable.estado, estados) : undefined
+          )
+        : undefined
+    )
+    const { offset } = pagination(page, limit)
+    const [items, [result]] = await Promise.all([
+      db
+        .select({ ...directoryColumns, anunciosCount: anunciosDisponiblesCount })
+        .from(fincasTable)
+        .where(where)
+        .orderBy(desc(directoryColumns.verificada), asc(fincasTable.name), asc(fincasTable.id))
+        .limit(limit)
+        .offset(offset),
+      db.select({ total: count() }).from(fincasTable).where(where),
+    ])
+    return c.json({ items, total: result?.total ?? 0, page, limit })
+  }
+)
+
 fincasRoutes.get("/:slug", async (c) => {
   const [finca] = await db
     .select({
       ...publicColumns,
-      anunciosCount: sql<number>`(
-        select count(*)::int from ${anunciosTable} a
-        where a.finca_id = ${fincasTable}."id" and a.status = 'publicado'
-          and not ${reservaVigenteEn(sql`a.id`)}
-      )`,
+      anunciosCount: anunciosDisponiblesCount,
     })
     .from(fincasTable)
     .where(eq(fincasTable.slug, c.req.param("slug")))

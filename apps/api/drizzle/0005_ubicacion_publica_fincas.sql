@@ -1,0 +1,1 @@
+ALTER TABLE "livestock_farm" ADD COLUMN "ubicacion_publica" jsonb;
