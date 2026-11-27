@@ -1,6 +1,6 @@
 # Documentación técnica de GanadoMarket
 
-**Repositorio de referencia** `marketplace2023/ganado_market` · rama `main`
+**Repositorio de referencia** `marketplace2023/ganado_market` · rama `main` · esquema Drizzle `0004`
 
 GanadoMarket es un marketplace ganadero para Venezuela. El sitio público permite buscar ganado y proveedores, consultar anuncios, contactar vendedores y seguir remates. El panel ganadero concentra fincas, anuncios, consultas, reservas y remates. El panel administrativo verifica fincas, modera contenido y administra usuarios, catálogos y parámetros de operación.
 
@@ -10,9 +10,12 @@ GanadoMarket es un marketplace ganadero para Venezuela. El sitio público permit
 - [Arquitectura y tecnologías](#arquitectura-y-tecnologías)
 - [Flujos y reglas de negocio](#flujos-y-reglas-de-negocio)
 - [Modelo de datos](#modelo-de-datos)
+- [Relaciones del esquema](#relaciones-del-esquema)
+- [Equivalencias con Odoo](#equivalencias-con-odoo)
 - [Referencia HTTP](#referencia-http)
 - [Ejemplos de integración](#ejemplos-de-integración)
 - [Configuración, ejecución y despliegue](#configuración-ejecución-y-despliegue)
+- [Actualización de una base existente](#actualización-de-una-base-existente)
 - [Límites y diagnóstico](#límites-y-diagnóstico)
 
 ## Alcance funcional
@@ -136,6 +139,44 @@ El último snapshot de Drizzle define **21 tablas de aplicación**. Las claves d
 | `livestock_audit_log` | `audit_log` | Acción, entidad, ID, resumen y copia del nombre y correo del administrador. | PK `id`; FK opcional `admin_id` a `res_users`. Los datos copiados preservan el historial al borrar la cuenta. |
 
 La eliminación de un anuncio elimina en cascada sus medios, reservas, favoritos y consultas. El API del ganadero impide borrarlo si tiene una reserva vigente o está referenciado en un remate. Al eliminar usuarios se aplican cascadas y relaciones anulables según la tabla. El API administrativo impide borrar la cuenta propia, el último administrador y cuentas que cumplen las condiciones de participación en remates activos. La raza borrada queda como referencia nula en los anuncios.
+
+### Relaciones del esquema
+
+El diagrama usa los nombres SQL actuales. `ir_config_parameter` es una tabla independiente de configuración.
+
+```mermaid
+erDiagram
+    res_users ||--o{ res_groups_users_rel : usuario
+    res_groups ||--o{ res_groups_users_rel : grupo
+    res_users ||..o{ livestock_password_reset : titular
+    res_users ||..o{ livestock_farm : propietario
+    livestock_species ||..o{ livestock_breed : especie
+    res_users ||..o{ livestock_listing : vendedor
+    livestock_farm ||..o{ livestock_listing : origen
+    livestock_species ||..o{ livestock_listing : especie
+    livestock_breed |o..o{ livestock_listing : raza
+    livestock_listing ||..o{ product_image : galeria
+    livestock_listing ||..o{ livestock_listing_reservation : reserva
+    livestock_listing ||..o{ crm_lead : consulta
+    res_users |o..o{ crm_lead : interesado
+    res_users ||--o{ product_wishlist : titular
+    livestock_listing ||--o{ product_wishlist : favorito
+    res_users ||..o{ livestock_purchase_request : autor
+    livestock_species |o..o{ livestock_purchase_request : especie
+    livestock_purchase_request ||--o{ livestock_purchase_request_contact : solicitud
+    res_users ||--o{ livestock_purchase_request_contact : visitante
+    res_users ||..o{ livestock_auction : organizador
+    livestock_farm ||..o{ livestock_auction : origen
+    livestock_auction ||..o{ livestock_auction_lot : lote
+    livestock_listing ||..o{ livestock_auction_lot : anuncio
+    livestock_auction_lot ||..o{ livestock_auction_bid : puja
+    res_users ||..o{ livestock_auction_bid : postor
+    res_users |o..o{ livestock_service : cuenta
+    livestock_listing ||..o{ livestock_listing_report : denunciado
+    res_users |o..o{ livestock_listing_report : reportante
+    res_users |o..o{ livestock_listing_report : resolutor
+    res_users |o..o{ livestock_audit_log : administrador
+```
 
 ### Equivalencias con Odoo
 
@@ -396,6 +437,37 @@ npm run dev
 | [0002](../apps/api/drizzle/0002_silent_synch.sql) | Denuncias e historial administrativo. |
 | [0003](../apps/api/drizzle/0003_reservas_anuncio.sql) | Reservas privadas y restricciones de unicidad. |
 | [0004](../apps/api/drizzle/0004_odoo_table_names.sql) | Renombra las 21 tablas con `ALTER TABLE … RENAME TO`. Conserva sus registros, columnas, índices y restricciones. Aplicar en coordinación con el despliegue del API que usa los nombres nuevos. |
+
+### Actualización de una base existente
+
+El API y PostgreSQL deben usar la misma versión de los nombres físicos. En la actualización a `0004`, coordinar el cambio de la base con el arranque de la nueva versión del API.
+
+1. Confirmar la base de destino mediante `DATABASE_URL`, guardar un respaldo y registrar los conteos de las tablas que se quiera verificar.
+2. En el entorno de destino, detener el tráfico hacia las instancias del API que aún consultan los nombres anteriores. Desde la raíz del repositorio, ejecutar `npm run db:migrate` con la conexión de ese entorno.
+3. Iniciar las instancias del API compiladas con los nombres nuevos. Comprobar las tablas y los conteos, y probar el catálogo y los flujos autenticados antes de restablecer el tráfico.
+4. Si se requiere volver a una versión anterior, restaurar juntos un esquema compatible y la versión correspondiente del API. Considerar las escrituras realizadas desde el respaldo. La migración `0004` es ascendente y el proyecto no incluye un comando de reversión automática.
+
+Ejemplo de verificación de solo lectura en PostgreSQL. La consulta devuelve `true` para cada par cuando existe el nombre nuevo y se retiró el anterior.
+
+```sql
+SELECT anterior, actual,
+       to_regclass('public.' || anterior) IS NULL
+       AND to_regclass('public.' || actual) IS NOT NULL AS renombrada
+FROM (VALUES
+  ('users', 'res_users'),
+  ('anuncios', 'livestock_listing'),
+  ('reservas_anuncio', 'livestock_listing_reservation'),
+  ('subastas', 'livestock_auction')
+) AS nombres(anterior, actual);
+```
+
+| Verificación | Resultado esperado |
+| --- | --- |
+| Conteo de tablas y de registros | 21 tablas de aplicación y los conteos registrados antes de migrar. |
+| `GET /catalogo/especies` y `GET /anuncios` | `200` con datos de la base. Si hay fotos, el catálogo devuelve sus URLs. |
+| `POST /auth/login` y `GET /auth/me` | Inicio de sesión y roles de la cuenta de prueba. |
+| Ficha de anuncio, reserva y detalle de remate | Las relaciones, fotos y reservas existentes se pueden consultar desde el flujo correspondiente. |
+| `npm run db:generate` en el repositorio | El snapshot `0004` coincide con las definiciones de Drizzle. El comando no debe generar otra migración por este cambio. |
 
 ## Límites y diagnóstico
 
