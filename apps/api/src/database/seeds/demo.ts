@@ -30,6 +30,7 @@ const demoPhotos = new Map([
   ["Toro padrote Brahman registrado", "toro-brahman"],
   ["30 novillas mestizas para vientre", "novillas-mestizas"],
   ["Novillos Nelore para ceba", "novillos-nelore"],
+  ["Lote QA de 15 novillos Simbrah", "novillos-simbrah"],
   ["Vacas Carora paridas con becerra", "vacas-carora"],
   ["Novillas Girolando preñadas", "novillas-girolando"],
   ["Búfalas Murrah en producción", "bufalas-murrah"],

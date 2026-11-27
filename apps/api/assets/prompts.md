@@ -56,6 +56,10 @@ Use case: photorealistic-natural. Asset type: demonstration listing photograph f
 
 Use case: photorealistic-natural. Asset type: demonstration listing photograph for GanadoMarket, a Venezuelan cattle marketplace. Subject and scene: Wide scenic establishing shot of a small working dairy farm in green foothills in Machiques de Perijá, Zulia, Venezuela, low simple roofed milking shed, lush grass, distant tropical trees and a few cream cows, mild morning light, no people. Natural documentary farm photography, authentic geography and animal anatomy, natural color, quiet unposed composition, food/agriculture editorial quality, suitable for a landscape 4:3 crop with key subjects inside the center, no people, no text, no logo, no watermark, no collage. Illustrative demo asset.
 
+### [novillos-simbrah](demo-images/novillos-simbrah.webp)
+
+Use case: photorealistic-natural. Asset type: illustrative landscape photo for the GanadoMarket QA listing for 15 Simbrah steers. Natural documentary livestock photograph of a coherent group of adolescent beef steers of Simbrah type in a working Venezuelan cattle ranch in Apure. Show a representative portion of the lot, several healthy stocky rust-red and dark reddish-brown young steers with subtle zebu influence and natural white facial or underbelly markings visible on some animals. Foreground animals in relaxed full-body three-quarter views, with more cattle further back. Flat tropical pasture, weathered timber rail, native tree in distance, gentle neutral daylight, natural green and earth tones, editorial ranch photography. Composition for a 4:3 listing with the cattle well within the central crop area, clean accurate animal anatomy, no text, no watermark, no people, no collage. This is a fictional demonstration image.
+
 ## Imágenes de ingreso y registro
 
 ### [comprador-ingreso](../../../apps/web/src/assets/auth/comprador-ingreso.webp)
