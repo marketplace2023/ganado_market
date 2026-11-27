@@ -4,6 +4,8 @@ Monorepo con los actores del ecosistema de compra y venta de ganado: **backend**
 público**, **panel del ganadero** y **panel administrador**, cada uno en su espacio y compartiendo
 tipos, validaciones y componentes.
 
+Consulta la [documentación técnica](docs/tecnico.md) para ver la arquitectura, las tablas y la referencia HTTP.
+
 Sigue la misma lógica que `marketplace-agro` (Hono + Drizzle + PostgreSQL en el backend, React +
 Vite + shadcn en los frontends, despliegue Render + Neon + Netlify). La diferencia es que aquí todo
 vive en un solo repositorio orquestado con **Turborepo** y **npm workspaces**.
